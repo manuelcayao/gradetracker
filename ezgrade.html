@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>EZ Grade Tracker — PCCAES </title>
+
+<!-- SheetJS for Excel parsing -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+:root{
+  --primary:#2b6cb0; --accent:#16a34a; --danger:#dc2626; --muted:#6b7280;
+  --light-green: #e6ffef;
+}
+*{box-sizing:border-box}
+body{font-family:Arial,Helvetica,sans-serif;margin:0;background:#f3f6fb;color:#111}
+header{background:var(--primary);color:#fff;padding:12px 18px;display:flex;justify-content:space-between;align-items:center}
+header h1{margin:0;font-size:18px}
+.container{max-width:1200px;margin:18px auto;padding:0 16px}
+.layout{display:flex;gap:20px;align-items:flex-start}
+.article{flex:1;background:#fff;padding:18px;border-radius:8px;border:1px solid #e8eef8}
+.login-box{width:360px;background:#fff;padding:18px;border-radius:8px;border:1px solid #e8eef8}
+.login-box-improved{background:linear-gradient(0deg,#ffffff,#f8fafc); padding:18px; border-radius:8px; box-shadow:0 1px 6px rgba(0,0,0,0.06);}
+h2{margin:0 0 12px 0}
+p.small{color:var(--muted);font-size:13px}
+label{display:block;margin-top:8px;font-weight:600;font-size:13px}
+input,select,button,textarea{width:100%;padding:8px;border-radius:6px;border:1px solid #dfe7f3;margin-top:6px;font-size:14px}
+button{cursor:pointer}
+.btn-primary{background:var(--primary);color:#fff;border:none;padding:8px 10px;border-radius:6px}
+.btn-success{background:var(--accent);color:#fff;border:none;padding:8px 10px;border-radius:6px}
+.btn-danger{background:var(--danger);color:#fff;border:none;padding:8px 10px;border-radius:6px}
+.btn-outline{background:#fff;color:var(--primary);border:1px solid var(--primary);padding:8px;border-radius:6px}
+.btn-warning{background:#f59e0b;color:white;border:none;padding:8px;border-radius:6px}
+.small{font-size:13px;color:var(--muted)}
+.page{display:none;margin-top:12px}
+.page.active{display:block}
+.card{background:#fff;border:1px solid #e8eef8;padding:12px;border-radius:8px}
+.table{width:100%;border-collapse:collapse;margin-top:12px}
+.table th,.table td{border:1px solid #e6eef8;padding:8px;text-align:center;font-size:13px}
+.table th{background:#eef6ff}
+.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);align-items:center;justify-content:center;z-index:9999}
+.modal .modal-content{width:96%;max-width:980px;background:#fff;padding:16px;border-radius:8px;max-height:90vh;overflow:auto}
+.close{float:right;cursor:pointer;color:#333;font-weight:700}
+.loading{display:none;text-align:center;margin:12px 0}
+@media (max-width:1200px){ .container{padding:0 12px} }
+@media (max-width:900px){.layout{flex-direction:column}.login-box{width:100%}.modal .modal-content{width:95%}}
+.role-grid { display:flex; flex-wrap:wrap; gap:8px; }
+.role-grid button { padding:8px; border-radius:6px; border:1px solid #dfe7f3; background:#fff; cursor:pointer; }
+.admin-btn-small { padding:6px 8px; font-size:13px; border-radius:6px; }
+.green-article { background: var(--light-green); padding:16px; border-radius:8px; text-align:center; }
+.controls-top { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+.dec-btn { padding:6px 8px; border-radius:6px; }
+.muted-note { color:var(--muted); font-size:13px; margin-top:6px; }
+.file-input-hidden { display:none }
+.feedback { font-size:13px; color:var(--muted); margin-top:6px; }
+.success { color: green; }
+.error { color: var(--danger); }
+.filter-section { display: flex; gap: 8px; align-items: center; }
+.filter-section input { width: 150px; }
+.forgot-password { text-align: right; margin-top: 8px; }
+.forgot-password a { color: var(--primary); text-decoration: none; font-size: 13px; }
+.forgot-password a:hover { text-decoration: underline; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>EZ Grade Tracker — PCCAES</h1>
+  <div class="small"> LOGIN FORM</div>
+</header>
+
+<!-- MAIN container / landing (login area). Hidden after login -->
+<div class="container" id="landing">
+  <div class="layout">
+    <div style="flex:1">
+      <div class="article">
+        <h2>Welcome to EZ Grade Tracker</h2>
+        <p class="small">Teachers / admins: import students via Excel (per-grade), add/edit students manually, and print report cards. Students create their own account using LRN + password and can view their report card. Admins manage teacher/admin accounts and exports.</p>
+
+        <div style="display:flex;gap:12px;margin-top:12px">
+          <div class="card" style="flex:2">
+            <h3>Quick Features</h3>
+            <ul class="small">
+              <li>Per-grade dashboards (SPED/Kinder/Grade 1–6) — add / import / export / edit / delete students.</li>
+              <li>MAPEH parts and optional Arabic/Islamic subjects are handled per-grade.</li>
+              <li>Decimal controls to change displayed decimals for averages on grade dashboards.</li>
+              <li>Data persisted to IndexedDB (suitable for thousands+ records).</li>
+              <li>Students can reset forgotten passwords with security questions.</li>
+            </ul>
+          </div>
+
+          <div class="green-article" style="flex:1;align-self:center">
+            <h3 style="margin:6px 0">EZ Grade Tracker uses</h3>
+            <p class="small">Attendance & grade recording, report card generation, quick imports/exports, teacher account management, and admin oversight — tailored for local school workflows.</p>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:12px">
+          <h3>Notes & placeholders</h3>
+          <p class="small">School name/logo placeholders are left blank in the export. This demo stores passwords in plain text (for convenience only) — consider hashing in production.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Login box (logout removed from login form) -->
+    <aside class="login-box login-box-improved">
+      <h2 style="margin-top:0">Login / Create Account</h2>
+
+      <label>Role</label>
+      <select id="roleSelect">
+        <option value="student">Student</option>
+        <option value="admin">Admin</option>
+        <option value="sped">SPED</option>
+        <option value="kinder">Kinder</option>
+        <option value="1">Grade 1</option>
+        <option value="2">Grade 2</option>
+        <option value="3">Grade 3</option>
+        <option value="4">Grade 4</option>
+        <option value="5">Grade 5</option>
+        <option value="6">Grade 6</option>
+      </select>
+
+      <!-- Student login -->
+      <div id="studentLoginBlock" style="margin-top:8px">
+        <label>LRN (12 digits)</label>
+        <input id="studentLoginLRN" placeholder="Enter 12-digit LRN">
+        <label>Password</label>
+        <input id="studentLoginPass" type="password" placeholder="Enter password">
+        <div class="forgot-password">
+          <a href="#" onclick="showForgotPasswordModal(); return false;">Forgot Password?</a>
+        </div>
+      </div>
+
+      <!-- Email login for admin/teacher -->
+      <div id="emailLoginBlock" style="display:none;margin-top:8px">
+        <label>Email (for Admin / Teacher)</label>
+        <input id="emailLogin" placeholder="name@depedqc.ph">
+        <label>Password</label>
+        <input id="emailLoginPass" type="password" placeholder="Enter password">
+        <div class="muted-note">Teachers: use your @depedqc.ph account created by an Admin.</div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button class="btn-primary" id="btnLogin">Login</button>
+        <!-- logout removed from here intentionally -->
+      </div>
+
+      <hr style="margin:12px 0">
+
+      <h3 style="margin:0 0 8px 0">Create Student Account</h3>
+      <p class="small">Students: create account with LRN + password. Your LRN must already exist in student records (teacher/admin should add students first).</p>
+      <label>LRN (12 digits)</label>
+      <input id="createLRN" placeholder="Enter 12-digit LRN">
+      <label>Password</label>
+      <input id="createPass" type="password" placeholder="Choose a password">
+      <label>Confirm Password</label>
+      <input id="createPass2" type="password" placeholder="Confirm password">
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <button class="btn-success" id="btnCreateStudent">Create Account</button>
+        <button class="btn-outline" id="btnClearCreate">Clear</button>
+      </div>
+
+      <div id="loginMsg" class="small" style="margin-top:10px;color:var(--muted)"></div>
+    </aside>
+  </div>
+</div><!-- /landing container -->
+
+<!-- STUDENT PAGE -->
+<section id="page-student" class="page container">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <h2>Student — Report Card</h2>
+    <div style="display:flex;gap:8px">
+      <button class="btn-outline" onclick="showLanding()">Home</button>
+      <button class="btn-warning" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <h3>My Report Card</h3>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input id="studentSearchLRN" placeholder="Enter LRN or leave empty to view your own (if logged in)">
+      <button class="btn-success" onclick="studentSearch()">Show</button>
+      <div style="margin-left:auto">
+        <button class="btn-outline" id="btnStudentPrint" onclick="studentPrint()" style="display:none">Download PDF</button>
+      </div>
+    </div>
+    <div id="studentResult" style="margin-top:12px"></div>
+  </div>
+</section>
+
+<!-- ADMIN PAGE -->
+<section id="page-admin" class="page container">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <h2>Admin Page</h2>
+    <div style="display:flex;gap:8px">
+      <button class="btn-outline" onclick="showLanding()">Home</button>
+      <button class="btn-warning" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <h3>Create Teacher/Admin Account</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end">
+      <div>
+        <label>Email (must be @depedqc.ph)</label><input id="adminCreateEmail" placeholder="name@depedqc.ph">
+      </div>
+      <div>
+        <label>Password</label><input id="adminCreatePass" type="password" placeholder="password">
+      </div>
+
+      <div>
+        <label>Role</label>
+        <select id="adminCreateRole">
+          <option value="teacher">Teacher</option>
+          <option value="admin">Admin</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Assigned Grade Level (for Teacher)</label>
+        <select id="adminCreateGrade">
+          <option value="">-- Select Grade --</option>
+          <option value="sped">SPED</option>
+          <option value="kinder">Kinder</option>
+          <option value="1">Grade 1</option>
+          <option value="2">Grade 2</option>
+          <option value="3">Grade 3</option>
+          <option value="4">Grade 4</option>
+          <option value="5">Grade 5</option>
+          <option value="6">Grade 6</option>
+        </select>
+      </div>
+
+      <div style="display:flex;align-items:end">
+        <button class="btn-success admin-btn-small" onclick="adminCreateAccount()">Create Account</button>
+      </div>
+    </div>
+    <div class="feedback" id="adminCreateFeedback"></div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <h3>Admin Tools</h3>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <button class="btn-success admin-btn-small" onclick="exportAllCSV()">Export All Students (CSV)</button>
+      <button class="btn-danger admin-btn-small" onclick="purgeAll()">Purge All Students</button>
+      <button class="btn-outline admin-btn-small" onclick="showAllAccounts()">Show All Accounts</button>
+
+      <!-- Teacher accounts Excel upload -->
+      <label class="btn-outline admin-btn-small" style="padding:6px;cursor:pointer;">
+        Upload Teacher/Admin Excel
+        <input id="teacherUpload" type="file" accept=".xlsx,.xls,.csv" style="display:none">
+      </label>
+      <button class="btn-primary admin-btn-small" onclick="processTeacherUpload()">Import Accounts</button>
+
+      <div id="teacherUploadFeedback" class="feedback" style="margin-left:8px"></div>
+    </div>
+    <div class="muted-note">Excel columns should be: <code>Email</code>, <code>Password</code>, <code>Role</code>, <code>Grade</code> (Grade optional for admin). Example row: <code>teacher1@depedqc.ph</code>,<code>teacher123</code>,<code>teacher</code>,<code>1</code></div>
+  </div>
+
+  <div class="card" style="margin-top:12px;overflow:auto">
+    <h3>Existing Accounts</h3>
+    <div id="accountsList" class="small"></div>
+  </div>
+</section>
+
+<!-- GRADE DASHBOARDS (SPED, Kinder, Grade 1-6) -->
+<section id="page-grade" class="page container">
+  <div style="display:flex;justify-content:space-between;align-items:center">
+    <h2 id="gradeTitle">Grade Dashboard</h2>
+    <div style="display:flex;gap:8px">
+      <button class="btn-outline" onclick="showLanding()">Home</button>
+      <button class="btn-warning" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:12px">
+    <div class="controls-top">
+      <div>
+        <button class="btn-success" id="btnAddStudentGrade" onclick="openAddStudentModal()">+ Add Student</button>
+      </div>
+      <div class="filter-section">
+        <label>LRN Filter</label>
+        <input id="gradeFilterLRN" placeholder="Filter by LRN" oninput="renderGradeTable()">
+        <label>Section Filter</label>
+        <input id="gradeFilterSection" placeholder="Filter by section" oninput="renderGradeTable()">
+      </div>
+
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+        <label class="btn-outline" style="padding:6px;cursor:pointer;">
+          Select Excel
+          <input id="gradeUpload" type="file" accept=".xlsx,.xls" style="display:none">
+        </label>
+        <button class="btn-primary" onclick="gradeUploadExcel()">Upload Excel</button>
+        <button class="btn-outline" onclick="exportGrade()">Export Excel (Grade)</button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:12px;align-items:center;margin-top:8px">
+      <div>
+        <label>Decimal places:</label>
+        <button class="dec-btn" onclick="changeDecimal(-1)">−</button>
+        <span id="decimalDisplay">2</span>
+        <button class="dec-btn" onclick="changeDecimal(1)">+</button>
+      </div>
+      <div class="muted-note" style="margin-left:auto">Optional subjects (Arabic / Islamic) are counted only if grades exist.</div>
+    </div>
+
+    <div id="uploadStatus" class="small" style="margin-top:8px"></div>
+  </div>
+
+  <div class="card" style="margin-top:12px;overflow:auto">
+    <table class="table" id="gradeTable">
+      <thead>
+        <tr>
+          <th>#</th><th>Name</th><th>LRN</th><th>Grade</th><th>Section</th><th>School Year</th><th>Adviser</th>
+          <th>1Q Avg</th><th>2Q Avg</th><th>3Q Avg</th><th>4Q Avg</th><th>Overall Avg</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="gradeTableBody"></tbody>
+    </table>
+  </div>
+</section>
+
+<footer style="background:#fff;padding:12px;border-top:1px solid #e9eef8;text-align:center">
+  Program created by: ICT COORDINATOR 2025
+</footer>
+
+<!-- MODALS -->
+<div id="studentModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('studentModal')">&times;</span>
+    <h3 id="studentModalTitle">Add / Edit Student</h3>
+    <form id="studentForm">
+      <input type="hidden" id="edit_lrn_key" />
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <label>LRN</label><input id="f_lrn" required>
+          <label>Last Name</label><input id="f_last">
+          <label>First Name</label><input id="f_first">
+          <label>Middle Name</label><input id="f_middle">
+          <label>Suffix</label><input id="f_suffix">
+          <label>Gender</label><input id="f_gender">
+        </div>
+        <div>
+          <label>Grade Level</label><select id="f_grade">
+            <option value="kinder">Kinder</option>
+            <option value="sped">SPED</option>
+            <option value="1">Grade 1</option>
+            <option value="2">Grade 2</option>
+            <option value="3">Grade 3</option>
+            <option value="4">Grade 4</option>
+            <option value="5">Grade 5</option>
+            <option value="6">Grade 6</option>
+          </select>
+          <label>Section</label><input id="f_section">
+          <label>School Year</label><input id="f_schoolyear" placeholder="e.g., 2025-2026">
+          <label>Adviser</label><input id="f_adviser">
+          <label>Full Name (optional)</label><input id="f_name">
+        </div>
+      </div>
+
+      <hr style="margin:12px 0">
+      <h4>Grades (enter 1st - 4th quarter per subject; leave blank if N/A)</h4>
+
+      <div style="overflow:auto;max-height:50vh">
+        <table style="width:100%;border-collapse:collapse">
+          <thead><tr><th style="text-align:left">Subject</th><th>1st</th><th>2nd</th><th>3rd</th><th>4th</th></tr></thead>
+          <tbody id="gradesInputsBody"></tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:12px;display:flex;gap:8px;">
+        <button class="btn-success" type="submit">Save Student</button>
+        <button type="button" class="btn-outline" onclick="closeModal('studentModal')">Cancel</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="viewModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('viewModal')">&times;</span>
+    <div id="viewContent"></div>
+    <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn-outline" onclick="printView()">Download as PDF</button>
+      <button class="btn-primary" onclick="closeModal('viewModal')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div id="forgotPasswordModal" class="modal">
+  <div class="modal-content" style="max-width:500px">
+    <span class="close" onclick="closeModal('forgotPasswordModal')">&times;</span>
+    <h3>Reset Student Password</h3>
+    
+    <div id="forgotPasswordStep1">
+      <label>LRN (12 digits)</label>
+      <input id="resetLRN" placeholder="Enter your 12-digit LRN">
+      <div class="feedback" id="resetLRNFeedback"></div>
+      
+      <div style="margin-top:12px;display:flex;gap:8px;">
+        <button class="btn-primary" onclick="verifyLRN()">Verify LRN</button>
+        <button type="button" class="btn-outline" onclick="closeModal('forgotPasswordModal')">Cancel</button>
+      </div>
+    </div>
+    
+    <div id="forgotPasswordStep2" style="display:none">
+      <p class="small">Please answer your security question to reset your password.</p>
+      <div id="securityQuestionContainer"></div>
+      
+      <label>Answer</label>
+      <input id="securityAnswer" placeholder="Enter your answer">
+      
+      <label>New Password</label>
+      <input id="newPassword" type="password" placeholder="Enter new password">
+      
+      <label>Confirm New Password</label>
+      <input id="confirmNewPassword" type="password" placeholder="Confirm new password">
+      
+      <div class="feedback" id="resetPasswordFeedback"></div>
+      
+      <div style="margin-top:12px;display:flex;gap:8px;">
+        <button class="btn-success" onclick="resetPassword()">Reset Password</button>
+        <button type="button" class="btn-outline" onclick="closeModal('forgotPasswordModal')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===========================
+   IndexedDB wrapper & schema
+   =========================== */
+const DB_NAME = 'ez_grade_tracker_db';
+const DB_VERSION = 2; // Updated version for security questions
+const STORE_STUDENTS = 'students';
+const STORE_STUDENT_ACCOUNTS = 'student_accounts';
+const STORE_TEACHERS = 'teachers';
+const STORE_ADMINS = 'admins';
+const STORE_SECURITY_QUESTIONS = 'security_questions';
+
+let db = null;
+
+function openDB() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = function(e){
+      const idb = e.target.result;
+      if (!idb.objectStoreNames.contains(STORE_STUDENTS)) {
+        const s = idb.createObjectStore(STORE_STUDENTS, { keyPath: 'lrn' });
+        s.createIndex('gradeLevel', 'gradeLevel', { unique: false });
+      }
+      if (!idb.objectStoreNames.contains(STORE_STUDENT_ACCOUNTS)) {
+        idb.createObjectStore(STORE_STUDENT_ACCOUNTS, { keyPath: 'lrn' });
+      }
+      if (!idb.objectStoreNames.contains(STORE_TEACHERS)) {
+        idb.createObjectStore(STORE_TEACHERS, { keyPath: 'email' });
+      }
+      if (!idb.objectStoreNames.contains(STORE_ADMINS)) {
+        idb.createObjectStore(STORE_ADMINS, { keyPath: 'email' });
+      }
+      // Add security questions store
+      if (!idb.objectStoreNames.contains(STORE_SECURITY_QUESTIONS)) {
+        idb.createObjectStore(STORE_SECURITY_QUESTIONS, { keyPath: 'lrn' });
+      }
+    };
+    req.onsuccess = function(e){
+      db = e.target.result;
+      resolve(db);
+    };
+    req.onerror = function(e){
+      reject(e.target.error);
+    };
+  });
+}
+
+async function idbPut(storeName, obj) {
+  const database = db || await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = database.transaction(storeName, 'readwrite');
+    const store = tx.objectStore(storeName);
+    const req = store.put(obj);
+    req.onsuccess = ()=>resolve(req.result);
+    req.onerror = (ev)=>reject(ev.target.error);
+  });
+}
+
+async function idbGet(storeName, key) {
+  const database = db || await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = database.transaction(storeName, 'readonly');
+    const store = tx.objectStore(storeName);
+    const req = store.get(key);
+    req.onsuccess = ()=>resolve(req.result);
+    req.onerror = (ev)=>reject(ev.target.error);
+  });
+}
+
+async function idbDelete(storeName, key) {
+  const database = db || await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = database.transaction(storeName, 'readwrite');
+    const store = tx.objectStore(storeName);
+    const req = store.delete(key);
+    req.onsuccess = ()=>resolve();
+    req.onerror = (ev)=>reject(ev.target.error);
+  });
+}
+
+async function idbGetAll(storeName) {
+  const database = db || await openDB();
+  return new Promise((resolve, reject) => {
+    const tx = database.transaction(storeName, 'readonly');
+    const store = tx.objectStore(storeName);
+    const req = store.getAll();
+    req.onsuccess = ()=>resolve(req.result || []);
+    req.onerror = (ev)=>reject(ev.target.error);
+  });
+}
+
+/* ===========================
+   Subject lists (per-grade)
+   =========================== */
+const SUBJECTS_MAP = {
+  'kinder': ['Filipino','English','Mathematics','Science','AP','TLE','ESP','GMRC'],
+  'sped': ['Filipino','English','Mathematics','Science','AP','TLE','ESP','GMRC'],
+  '1': ['Reading & Literacy','Language','Mathematics','Makabansa','GMRC','Arabic Language','Islamic Values Education'],
+  '2': ['Reading & Literacy','Language','Mathematics','Makabansa','GMRC','Arabic Language','Islamic Values Education'],
+  '3': ['Filipino','English','Mathematics','Science','Araling Panlipunan (AP)','Edukasyong Pantahanan at Pangkabuhayan (EPP)','Music & Arts','PE & Health','GMRC','Arabic Language','Islamic Values Education'],
+  '4': ['Filipino','English','Mathematics','Science','Araling Panlipunan (AP)','Edukasyong Pantahanan at Pangkabuhayan (EPP)','Music','Arts','Physical Education (PE)','Health','Arabic Language','Islamic Values Education','GMRC'],
+  '5': ['Filipino','English','Mathematics','Science','Araling Panlipunan (AP)','Edukasyong Pantahanan at Pangkabuhayan (EPP)','Music','Arts','Physical Education (PE)','Health','Arabic Language','Islamic Values Education','GMRC'],
+  '6': ['Filipino','English','Mathematics','Science','Araling Panlipunan (AP)','Edukasyong Pantahanan at Pangkabuhayan (EPP)','Music','Arts','Physical Education (PE)','Health','Edukasyon sa Pagpapakatao (ESP)','Arabic Language','Islamic Values Education','GMRC']
+};
+
+function getSubjectsForGrade(g) {
+  return SUBJECTS_MAP[String(g)] || SUBJECTS_MAP['kinder'];
+}
+
+/* ===========================
+   UI state & helpers
+   =========================== */
+let currentUser = null; // { role:'admin'|'teacher'|'student', email?, lrn?, assignedGrade? }
+let currentGradeContext = null;
+let decimalPlaces = 2;
+let currentResetLRN = null;
+
+/* Escape */
+function escapeHtml(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* Navigation */
+function showLanding(){
+  document.getElementById('landing').style.display = 'block';
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+}
+
+/* Show a single page and hide landing */
+function navigateTo(page) {
+  document.getElementById('landing').style.display = 'none';
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  if (page === 'student') document.getElementById('page-student').classList.add('active');
+  if (page === 'admin') document.getElementById('page-admin').classList.add('active');
+  if (page === 'grade') document.getElementById('page-grade').classList.add('active');
+}
+
+/* Logout */
+function logout(){
+  currentUser = null;
+  currentGradeContext = null;
+  // btnLogout not present in login area; only show login button on landing
+  document.getElementById('loginMsg').textContent = '';
+  showLanding();
+}
+
+/* ===========================
+   Initialization: open DB and seed admin/teacher/student
+   =========================== */
+(async function init() {
+  await openDB();
+
+  // migrate any localStorage if present (non-destructive)
+  try { await migrateFromLocalStorage(); } catch(e){}
+
+  // seed admin if empty
+  const admins = await idbGetAll(STORE_ADMINS);
+  if (!admins || !admins.length) {
+    await idbPut(STORE_ADMINS, { email:'admin@depedqc.ph', password:'admin123' });
+  }
+
+  // seed a demo teacher if missing
+  const t1 = await idbGet(STORE_TEACHERS, 'teacher1@depedqc.ph');
+  if (!t1) {
+    await idbPut(STORE_TEACHERS, { email:'teacher1@depedqc.ph', password:'teacher123', role:'teacher', assignedGrade:'1' });
+  }
+
+  // seed a demo student if missing
+  const sDemo = await idbGet(STORE_STUDENTS, '123456789012');
+  if (!sDemo) {
+    const demoStudent = {
+      lrn: '123456789012',
+      lastName: 'Dela Cruz',
+      firstName: 'Juan',
+      middleName: 'Santos',
+      suffix: '',
+      name: 'Dela Cruz, Juan',
+      gender: 'Male',
+      gradeLevel: '1',
+      section: 'A',
+      schoolYear: '2024-2025',
+      adviser: 'Mrs. Teacher',
+      grades: {
+        'Reading & Literacy': { q1:85, q2:87, q3:88, q4:86 },
+        'Language': { q1:90, q2:89, q3:91, q4:90 },
+        'Mathematics': { q1:80, q2:82, q3:79, q4:81 },
+        'Makabansa': { q1:85, q2:84, q3:86, q4:85 },
+        'GMRC': { q1:86, q2:85, q3:87, q4:86 }
+      }
+    };
+    await idbPut(STORE_STUDENTS, demoStudent);
+    // student account
+    await idbPut(STORE_STUDENT_ACCOUNTS, { lrn:'123456789012', password:'student123' });
+    // security question for demo student
+    await idbPut(STORE_SECURITY_QUESTIONS, { 
+      lrn: '123456789012', 
+      question: 'What is your mother\'s maiden name?',
+      answer: 'Santos' 
+    });
+  }
+
+  // wire initial UI
+  document.getElementById('roleSelect').addEventListener('change', onRoleChange);
+  onRoleChange();
+  document.getElementById('btnCreateStudent').addEventListener('click', handleCreateStudentAccount);
+  document.getElementById('btnClearCreate').addEventListener('click', ()=>{
+    document.getElementById('createLRN').value='';
+    document.getElementById('createPass').value='';
+    document.getElementById('createPass2').value='';
+  });
+  document.getElementById('btnLogin').addEventListener('click', handleLogin);
+
+  // admin upload input handler (store selected file)
+  document.getElementById('teacherUpload').addEventListener('change', (ev)=>{
+    const f = ev.target.files && ev.target.files[0];
+    if (f) {
+      document.getElementById('teacherUploadFeedback').innerHTML = `Selected file: ${escapeHtml(f.name)}`;
+    } else {
+      document.getElementById('teacherUploadFeedback').innerHTML = '';
+    }
+  });
+
+  // student search on page-student
+  document.getElementById('studentSearchLRN').addEventListener('keyup', (e)=>{ if (e.key === 'Enter') studentSearch(); });
+
+  // grade upload change
+  document.getElementById('gradeUpload').addEventListener('change', ()=>{ /* file selected */ });
+
+  // pre-generate grade inputs with default (kinder)
+  generateGradesInputsForForm(null, 'kinder');
+
+  // show landing initially
+  showLanding();
+})();
+
+/* Role change toggles forms */
+function onRoleChange(){
+  const role = document.getElementById('roleSelect').value;
+  if (role === 'student') {
+    document.getElementById('studentLoginBlock').style.display = 'block';
+    document.getElementById('emailLoginBlock').style.display = 'none';
+  } else {
+    document.getElementById('studentLoginBlock').style.display = 'none';
+    document.getElementById('emailLoginBlock').style.display = 'block';
+  }
+}
+
+/* ===========================
+   Student account creation (must match existing student record)
+   =========================== */
+async function handleCreateStudentAccount(){
+  const lrn = (document.getElementById('createLRN').value || '').trim();
+  const p1 = document.getElementById('createPass').value || '';
+  const p2 = document.getElementById('createPass2').value || '';
+  if (!/^\d{12}$/.test(lrn)) return alert('LRN must be exactly 12 digits.');
+  if (!p1 || !p2) return alert('Enter password and confirm');
+  if (p1 !== p2) return alert('Passwords do not match');
+
+  // check that student record exists
+  const student = await idbGet(STORE_STUDENTS, lrn);
+  if (!student) return alert('No student record found for this LRN. Ask teacher/admin to add the student first.');
+
+  // create account
+  await idbPut(STORE_STUDENT_ACCOUNTS, { lrn, password: p1 });
+  
+  // Set up security question if this is a new account
+  const existingSecurity = await idbGet(STORE_SECURITY_QUESTIONS, lrn);
+  if (!existingSecurity) {
+    // Default security question - in a real app, you'd prompt the user to set this up
+    await idbPut(STORE_SECURITY_QUESTIONS, { 
+      lrn, 
+      question: 'What is your mother\'s maiden name?',
+      answer: 'SetYourAnswer' // This would be set by the user in a real implementation
+    });
+  }
+  
+  alert('Student account created. You can now log in.');
+  document.getElementById('createLRN').value='';
+  document.getElementById('createPass').value='';
+  document.getElementById('createPass2').value='';
+}
+
+/* ===========================
+   Forgot Password functionality
+   =========================== */
+function showForgotPasswordModal() {
+  document.getElementById('forgotPasswordStep1').style.display = 'block';
+  document.getElementById('forgotPasswordStep2').style.display = 'none';
+  document.getElementById('resetLRN').value = '';
+  document.getElementById('resetLRNFeedback').textContent = '';
+  document.getElementById('resetPasswordFeedback').textContent = '';
+  openModal('forgotPasswordModal');
+}
+
+async function verifyLRN() {
+  const lrn = (document.getElementById('resetLRN').value || '').trim();
+  const feedbackEl = document.getElementById('resetLRNFeedback');
+  
+  if (!/^\d{12}$/.test(lrn)) {
+    feedbackEl.textContent = 'LRN must be exactly 12 digits.';
+    feedbackEl.className = 'feedback error';
+    return;
+  }
+  
+  // Check if student exists
+  const student = await idbGet(STORE_STUDENTS, lrn);
+  if (!student) {
+    feedbackEl.textContent = 'No student record found with this LRN.';
+    feedbackEl.className = 'feedback error';
+    return;
+  }
+  
+  // Check if student has an account
+  const account = await idbGet(STORE_STUDENT_ACCOUNTS, lrn);
+  if (!account) {
+    feedbackEl.textContent = 'No student account found with this LRN. Please create an account first.';
+    feedbackEl.className = 'feedback error';
+    return;
+  }
+  
+  // Check if security question is set up
+  const security = await idbGet(STORE_SECURITY_QUESTIONS, lrn);
+  if (!security) {
+    feedbackEl.textContent = 'Security question not set up for this account. Please contact administrator.';
+    feedbackEl.className = 'feedback error';
+    return;
+  }
+  
+  // Store the LRN for the next step
+  currentResetLRN = lrn;
+  
+  // Show security question
+  document.getElementById('securityQuestionContainer').innerHTML = `
+    <label>Security Question</label>
+    <div style="padding:8px;background:#f9f9f9;border-radius:6px;margin-bottom:8px">${security.question}</div>
+  `;
+  
+  // Move to step 2
+  document.getElementById('forgotPasswordStep1').style.display = 'none';
+  document.getElementById('forgotPasswordStep2').style.display = 'block';
+  feedbackEl.textContent = '';
+}
+
+async function resetPassword() {
+  const answer = (document.getElementById('securityAnswer').value || '').trim();
+  const newPassword = document.getElementById('newPassword').value || '';
+  const confirmPassword = document.getElementById('confirmNewPassword').value || '';
+  const feedbackEl = document.getElementById('resetPasswordFeedback');
+  
+  if (!answer) {
+    feedbackEl.textContent = 'Please answer the security question.';
+    feedbackEl.className = 'feedback error';
+    return;
+  }
+  
+  if (!newPassword) {
+    feedbackEl.textContent = 'Please enter a new password.';
+    feedbackEl.className = 'feedback error';
+    return;
+  }
+  
+  if (newPassword !== confirmPassword) {
+    feedbackEl.textContent = 'Passwords do not match.';
+    feedbackEl.className = 'feedback error';
+    return;
+  }
+  
+  // Verify security answer
+  const security = await idbGet(STORE_SECURITY_QUESTIONS, currentResetLRN);
+  if (!security || security.answer.toLowerCase() !== answer.toLowerCase()) {
+    feedbackEl.textContent = 'Incorrect answer to security question.';
+    feedbackEl.className = 'feedback error';
+    return;
+  }
+  
+  // Update password
+  await idbPut(STORE_STUDENT_ACCOUNTS, { 
+    lrn: currentResetLRN, 
+    password: newPassword 
+  });
+  
+  feedbackEl.textContent = 'Password successfully reset. You can now login with your new password.';
+  feedbackEl.className = 'feedback success';
+  
+  // Clear fields
+  document.getElementById('securityAnswer').value = '';
+  document.getElementById('newPassword').value = '';
+  document.getElementById('confirmNewPassword').value = '';
+  
+  // Close modal after a delay
+  setTimeout(() => {
+    closeModal('forgotPasswordModal');
+  }, 2000);
+}
+
+/* ===========================
+   Admin create account (with assigned grade)
+   =========================== */
+async function adminCreateAccount(){
+  const email = (document.getElementById('adminCreateEmail').value || '').trim().toLowerCase();
+  const pass = (document.getElementById('adminCreatePass').value || '').trim();
+  const role = document.getElementById('adminCreateRole').value;
+  const grade = (document.getElementById('adminCreateGrade').value || '').trim();
+
+  const feedbackEl = document.getElementById('adminCreateFeedback');
+  feedbackEl.textContent = '';
+
+  if (!email || !pass) { feedbackEl.textContent = 'Enter email and password'; feedbackEl.className = 'feedback error'; return; }
+  if (!email.endsWith('@depedqc.ph')) { feedbackEl.textContent = 'Email must be @depedqc.ph'; feedbackEl.className = 'feedback error'; return; }
+
+  if (role === 'teacher' && !grade) {
+    feedbackEl.textContent = 'Assign a grade level when creating a Teacher account.'; feedbackEl.className = 'feedback error'; return;
+  }
+
+  try {
+    if (role === 'teacher') {
+      const exists = await idbGet(STORE_TEACHERS, email);
+      if (exists) { feedbackEl.textContent = 'Teacher already exists'; feedbackEl.className = 'feedback error'; return; }
+      const teacherObj = { email, password: pass, role: 'teacher', assignedGrade: grade };
+      await idbPut(STORE_TEACHERS, teacherObj);
+      feedbackEl.textContent = 'Teacher account created.';
+      feedbackEl.className = 'feedback success';
+    } else {
+      const exists = await idbGet(STORE_ADMINS, email);
+      if (exists) { feedbackEl.textContent = 'Admin already exists'; feedbackEl.className = 'feedback error'; return; }
+      await idbPut(STORE_ADMINS, { email, password: pass });
+      feedbackEl.textContent = 'Admin account created.';
+      feedbackEl.className = 'feedback success';
+    }
+    document.getElementById('adminCreateEmail').value = '';
+    document.getElementById('adminCreatePass').value = '';
+    document.getElementById('adminCreateGrade').value = '';
+    renderAccountsList();
+  } catch (e) {
+    feedbackEl.textContent = 'Error creating account: ' + e.message;
+    feedbackEl.className = 'feedback error';
+  }
+}
+
+/* ===========================
+   Teacher/Admin bulk upload (Excel)
+   =========================== */
+async function processTeacherUpload(){
+  const fileEl = document.getElementById('teacherUpload');
+  const feedback = document.getElementById('teacherUploadFeedback');
+  feedback.textContent = '';
+  feedback.className = 'feedback';
+
+  if (!fileEl.files || !fileEl.files.length) {
+    feedback.textContent = 'Choose an Excel or CSV file first.';
+    feedback.className = 'feedback error';
+    return;
+  }
+  const file = fileEl.files[0];
+  const reader = new FileReader();
+  reader.onload = async function(evt) {
+    try {
+      const data = evt.target.result;
+      const wb = XLSX.read(data, { type: 'binary' });
+      const sheetName = wb.SheetNames[0];
+      const ws = wb.Sheets[sheetName];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      if (!rows || !rows.length) {
+        feedback.textContent = 'No rows found in file.';
+        feedback.className = 'feedback error';
+        return;
+      }
+
+      let created = 0, skipped = 0, errors = 0;
+      for (const r of rows) {
+        const email = (r['Email'] || r['email'] || r['E-mail'] || r['E-mail Address'] || '').toString().trim().toLowerCase();
+        const password = (r['Password'] || r['password'] || r['Pass'] || '').toString().trim();
+        const role = (r['Role'] || r['role'] || '').toString().trim().toLowerCase();
+        const grade = (r['Grade'] || r['grade'] || r['AssignedGrade'] || '').toString().trim();
+
+        if (!email || !password || !role) {
+          skipped++;
+          continue;
+        }
+        if (!email.endsWith('@depedqc.ph')) {
+          errors++;
+          continue;
+        }
+        if (role === 'teacher') {
+          if (!grade) { skipped++; continue; }
+          const exists = await idbGet(STORE_TEACHERS, email);
+          if (exists) { skipped++; continue; }
+          await idbPut(STORE_TEACHERS, { email, password, role: 'teacher', assignedGrade: grade });
+          created++;
+        } else if (role === 'admin') {
+          const exists = await idbGet(STORE_ADMINS, email);
+          if (exists) { skipped++; continue; }
+          await idbPut(STORE_ADMINS, { email, password });
+          created++;
+        } else {
+          skipped++;
+        }
+      }
+
+      feedback.textContent = `Import complete. Created: ${created}, Skipped: ${skipped}, Errors: ${errors}`;
+      feedback.className = 'feedback success';
+      renderAccountsList();
+      fileEl.value = '';
+    } catch (err) {
+      feedback.textContent = 'Failed to parse file: ' + err.message;
+      feedback.className = 'feedback error';
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+/* Render accounts list (admins + teachers with actions) */
+async function renderAccountsList(){
+  const el = document.getElementById('accountsList');
+  const admins = await idbGetAll(STORE_ADMINS);
+  const teachers = await idbGetAll(STORE_TEACHERS);
+
+  let html = '<strong>Admins</strong><br>';
+  for (const a of admins) {
+    html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <div style="flex:1">${escapeHtml(a.email)}</div>
+      <button class="admin-btn-small" onclick="resetAdminPassword('${escapeHtml(a.email)}')">Reset PW</button>
+      <button class="admin-btn-small" onclick="deleteAdmin('${escapeHtml(a.email)}')">Delete</button>
+    </div>`;
+  }
+  html += '<br><strong>Teachers</strong><br>';
+  for (const t of teachers) {
+    html += `<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <div style="flex:1">${escapeHtml(t.email)} ${t.assignedGrade ? '— grade: ' + escapeHtml(String(t.assignedGrade)) : ''}</div>
+      <button class="admin-btn-small" onclick="assignGradePrompt('${escapeHtml(t.email)}')">Assign Grade</button>
+      <button class="admin-btn-small" onclick="resetTeacherPassword('${escapeHtml(t.email)}')">Reset PW</button>
+      <button class="admin-btn-small" onclick="deleteTeacher('${escapeHtml(t.email)}')">Delete</button>
+    </div>`;
+  }
+  el.innerHTML = html;
+}
+
+async function showAllAccounts(){
+  await renderAccountsList();
+  navigateTo('admin');
+  document.getElementById('adminMsg').textContent = 'Accounts listed below.';
+}
+
+/* assign grade prompt */
+async function assignGradePrompt(email){
+  email = String(email);
+  const g = prompt('Enter grade to assign to teacher (kinder, sped, 1..6). Leave blank to unassign:');
+  if (g === null) return;
+  const t = await idbGet(STORE_TEACHERS, email);
+  if (!t) return alert('Teacher not found');
+  t.assignedGrade = g ? g.toString() : null;
+  await idbPut(STORE_TEACHERS, t);
+  renderAccountsList();
+}
+
+/* reset teacher/admin password functions */
+async function resetTeacherPassword(email){
+  if (!confirm('Reset password for ' + email + ' to default "teacher123"?')) return;
+  const t = await idbGet(STORE_TEACHERS, email);
+  if (!t) return alert('Teacher not found');
+  t.password = 'teacher123';
+  await idbPut(STORE_TEACHERS, t);
+  alert('Password reset to "teacher123"');
+  renderAccountsList();
+}
+async function resetAdminPassword(email){
+  if (!confirm('Reset password for ' + email + ' to default "admin123"?')) return;
+  const a = await idbGet(STORE_ADMINS, email);
+  if (!a) return alert('Admin not found');
+  a.password = 'admin123';
+  await idbPut(STORE_ADMINS, a);
+  alert('Password reset to "admin123"');
+  renderAccountsList();
+}
+
+/* delete teacher/admin */
+async function deleteTeacher(email){
+  if (!confirm('Delete teacher ' + email + '?')) return;
+  await idbDelete(STORE_TEACHERS, email);
+  alert('Teacher deleted');
+  renderAccountsList();
+}
+async function deleteAdmin(email){
+  if (!confirm('Delete admin ' + email + '?')) return;
+  await idbDelete(STORE_ADMINS, email);
+  alert('Admin deleted');
+  renderAccountsList();
+}
+
+/* ===========================
+   Login handling (fixed redirection)
+   =========================== */
+async function handleLogin(){
+  const roleSelected = document.getElementById('roleSelect').value;
+  if (roleSelected === 'student') {
+    const lrn = (document.getElementById('studentLoginLRN').value || '').trim();
+    const pass = document.getElementById('studentLoginPass').value || '';
+    if (!/^\d{12}$/.test(lrn)) return alert('LRN must be exactly 12 digits.');
+    if (!pass) return alert('Enter password');
+    const acct = await idbGet(STORE_STUDENT_ACCOUNTS, lrn);
+    if (!acct || acct.password !== pass) return alert('Invalid LRN or password');
+    const student = await idbGet(STORE_STUDENTS, lrn);
+    if (!student) {
+      alert('Student account exists but no student record found. Ask admin/teacher to add the student.');
+      return;
+    }
+    currentUser = { role: 'student', lrn };
+    navigateTo('student');
+    document.getElementById('studentSearchLRN').value = lrn;
+    studentSearch();
+    return;
+  }
+
+  // Admin or teacher login via email
+  const email = (document.getElementById('emailLogin').value || '').trim().toLowerCase();
+  const pass = (document.getElementById('emailLoginPass').value || '').trim();
+  if (!email || !pass) return alert('Enter email and password');
+
+  // admin check
+  const admin = await idbGet(STORE_ADMINS, email);
+  if (admin && admin.password === pass) {
+    currentUser = { role: 'admin', email };
+    navigateTo('admin');
+    renderAccountsList();
+    return;
+  }
+  // teacher check
+  const teacher = await idbGet(STORE_TEACHERS, email);
+  if (teacher && teacher.password === pass) {
+    currentUser = { role: 'teacher', email, assignedGrade: teacher.assignedGrade || null };
+    if (teacher.assignedGrade) {
+      openGradeDashboard(teacher.assignedGrade);
+    } else {
+      const g = prompt('No assigned grade. Enter grade to manage (kinder, sped, 1..6):');
+      if (g) openGradeDashboard(g.toString());
+      else showLanding();
+    }
+    return;
+  }
+
+  alert('Account not found or wrong password.');
+}
+
+/* ===========================
+   Student functions: view / print report
+   =========================== */
+function printView(){
+  const content = document.getElementById('viewContent').innerHTML;
+  const win = window.open('', '_blank', 'width=900,height=700');
+  win.document.write(`
+    <html><head><title>Report Card</title>
+    <style>
+      body{font-family:Arial,Helvetica,sans-serif;padding:12px}
+      table{border-collapse:collapse;width:100%}
+      th,td{border:1px solid #000;padding:6px;text-align:center}
+      th{background:#eee}
+      h3{text-align:center}
+    </style>
+    </head><body>${content}</body></html>
+  `);
+  win.document.close();
+  win.focus();
+  setTimeout(()=>{ win.print(); }, 250);
+}
+
+/* student search & display */
+async function studentSearch(){
+  let q = (document.getElementById('studentSearchLRN').value || '').trim();
+  if (!q && currentUser && currentUser.role === 'student') q = currentUser.lrn;
+  if (!q) { document.getElementById('studentResult').innerHTML = '<div class="small">Enter LRN to search</div>'; return; }
+  if (!/^\d{12}$/.test(q)) { document.getElementById('studentResult').innerHTML = '<div class="small">LRN must be 12 digits</div>'; return; }
+  const s = await idbGet(STORE_STUDENTS, q);
+  if (!s) { document.getElementById('studentResult').innerHTML = `<div class="card"><div class="small">LRN ${escapeHtml(q)} not found in records.</div></div>`; return; }
+  renderStudentReportCard(s, 'studentResult');
+  document.getElementById('btnStudentPrint').style.display = 'inline-block';
+  document.getElementById('btnStudentPrint').onclick = studentPrint;
+}
+
+function studentPrint(){
+  // Get the student data again to ensure we have the latest version
+  const lrn = document.getElementById('studentSearchLRN').value || currentUser.lrn;
+  
+  idbGet(STORE_STUDENTS, lrn).then(student => {
+    if (!student) {
+      alert('Student data not found');
+      return;
+    }
+    
+    // Render the report card in the view modal
+    renderStudentReportCard(student, 'viewContent');
+    
+    // Open the modal and trigger print
+    openModal('viewModal');
+    
+    // Wait a moment for the modal to render, then print
+    setTimeout(() => {
+      printView();
+    }, 500);
+  });
+}
+
+/* ===========================
+   Grade Dashboard: open, render, add/edit/delete
+   =========================== */
+function openGradeDashboard(gradeKey){
+  currentGradeContext = String(gradeKey);
+  document.getElementById('gradeTitle').innerText = (gradeKey === 'kinder' ? 'Kinder' : (gradeKey === 'sped' ? 'SPED' : 'Grade ' + gradeKey)) + ' Dashboard';
+  navigateTo('grade');
+  renderGradeTable();
+}
+
+/* render grade table */
+async function renderGradeTable(){
+  const tbody = document.getElementById('gradeTableBody');
+  tbody.innerHTML = '';
+  const lrnFilter = (document.getElementById('gradeFilterLRN').value || '').trim().toLowerCase();
+  const sectionFilter = (document.getElementById('gradeFilterSection').value || '').trim().toLowerCase();
+  
+  if (!currentGradeContext) {
+    tbody.innerHTML = '<tr><td colspan="13" class="small">No grade selected</td></tr>';
+    return;
+  }
+  
+  const all = await idbGetAll(STORE_STUDENTS);
+  const list = all.filter(s => String(s.gradeLevel) === String(currentGradeContext));
+  
+  const filtered = list.filter(s => {
+    // Filter by LRN if provided
+    if (lrnFilter && !(s.lrn||'').toLowerCase().includes(lrnFilter)) return false;
+    
+    // Filter by section if provided
+    if (sectionFilter && !(s.section||'').toLowerCase().includes(sectionFilter)) return false;
+    
+    return true;
+  });
+  
+  if (!filtered.length) { 
+    tbody.innerHTML = '<tr><td colspan="13" class="small">No student records match the filter criteria</td></tr>'; 
+    return; 
+  }
+
+  filtered.forEach((s,i) => {
+    const qavg = {};
+    for (let q=1; q<=4; q++){
+      const vals = [];
+      const subs = getSubjectsForGrade(currentGradeContext);
+      for (const sub of subs) {
+        const gradeVal = s.grades && s.grades[sub] && s.grades[sub]['q'+q];
+        if (gradeVal === null || gradeVal === undefined || gradeVal === '') continue;
+        vals.push(Number(gradeVal));
+      }
+      qavg[q] = vals.length ? round(Number((vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(6)), decimalPlaces) : null;
+    }
+    const overallAvg = (() => {
+      const vals = Object.values(qavg).filter(v => v !== null);
+      if (!vals.length) return null;
+      return round(Number((vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(6)), decimalPlaces);
+    })();
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${i+1}</td>
+      <td style="text-align:left">${escapeHtml(s.name || ([s.lastName,s.firstName].filter(Boolean).join(', ')))}</td>
+      <td>${s.lrn||''}</td>
+      <td>${s.gradeLevel||''}</td>
+      <td>${s.section||''}</td>
+      <td>${s.schoolYear||''}</td>
+      <td>${s.adviser||''}</td>
+      <td>${qavg[1]===null ? '—' : qavg[1]}</td>
+      <td>${qavg[2]===null ? '—' : qavg[2]}</td>
+      <td>${qavg[3]===null ? '—' : qavg[3]}</td>
+      <td>${qavg[4]===null ? '—' : qavg[4]}</td>
+      <td>${overallAvg===null ? '—' : overallAvg}</td>
+      <td>
+        <button class="btn-outline admin-btn-small" onclick="viewStudentRecord('${s.lrn}')">View</button>
+        <button class="btn-success admin-btn-small" onclick="openEditStudentModalFor('${s.lrn}')">Edit</button>
+        <button class="btn-danger admin-btn-small" onclick="deleteStudentRecord('${s.lrn}')">Delete</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* Decimal handlers */
+function changeDecimal(delta){
+  decimalPlaces = Math.max(0, Math.min(6, decimalPlaces + delta));
+  document.getElementById('decimalDisplay').textContent = decimalPlaces;
+  if (document.getElementById('page-grade').classList.contains('active')) renderGradeTable();
+}
+
+/* helper rounding */
+function round(num, decimals) {
+  const p = Math.pow(10, decimals);
+  return Math.round(num * p) / p;
+}
+
+/* Add / Edit student modal */
+function openAddStudentModal(){
+  document.getElementById('studentModalTitle').textContent = 'Add Student';
+  document.getElementById('edit_lrn_key').value = '';
+  ['f_lrn','f_last','f_first','f_middle','f_suffix','f_gender','f_section','f_schoolyear','f_adviser','f_name'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  if (currentGradeContext) document.getElementById('f_grade').value = currentGradeContext;
+  generateGradesInputsForForm(null, document.getElementById('f_grade').value || currentGradeContext);
+  openModal('studentModal');
+}
+
+async function openEditStudentModalFor(lrn){
+  const s = await idbGet(STORE_STUDENTS, lrn);
+  if (!s) return alert('Student not found');
+  document.getElementById('studentModalTitle').textContent = 'Edit Student';
+  document.getElementById('edit_lrn_key').value = lrn;
+  document.getElementById('f_lrn').value = s.lrn;
+  document.getElementById('f_last').value = s.lastName || '';
+  document.getElementById('f_first').value = s.firstName || '';
+  document.getElementById('f_middle').value = s.middleName || '';
+  document.getElementById('f_suffix').value = s.suffix || '';
+  document.getElementById('f_gender').value = s.gender || '';
+  document.getElementById('f_grade').value = s.gradeLevel || (currentGradeContext||'');
+  document.getElementById('f_section').value = s.section || '';
+  document.getElementById('f_schoolyear').value = s.schoolYear || '';
+  document.getElementById('f_adviser').value = s.adviser || '';
+  document.getElementById('f_name').value = s.name || '';
+  generateGradesInputsForForm(s.grades || {}, document.getElementById('f_grade').value || currentGradeContext);
+  openModal('studentModal');
+}
+
+/* Delete student */
+async function deleteStudentRecord(lrn){
+  if (!confirm('Delete student with LRN ' + lrn + '?')) return;
+  await idbDelete(STORE_STUDENTS, lrn);
+  await renderGradeTable();
+}
+
+/* ===========================
+   Grades input generator & save
+   =========================== */
+const gradesInputsBody = document.getElementById('gradesInputsBody');
+
+function generateGradesInputsForForm(grades, gradeLevel) {
+  const subjectsDisplay = getSubjectsForGrade(gradeLevel || document.getElementById('f_grade').value || currentGradeContext || 'kinder');
+  let html = '';
+  for (const sub of subjectsDisplay) {
+    const g = (grades && grades[sub]) || {};
+    const q1 = g.q1 === null || g.q1 === undefined ? '' : g.q1;
+    const q2 = g.q2 === null || g.q2 === undefined ? '' : g.q2;
+    const q3 = g.q3 === null || g.q3 === undefined ? '' : g.q3;
+    const q4 = g.q4 === null || g.q4 === undefined ? '' : g.q4;
+    const idBase = 'f_' + sub.toLowerCase().replace(/\s+/g,'_').replace(/[^\w\-]/g,'');
+    html += `<tr>
+      <td style="text-align:left;padding:8px">${escapeHtml(sub)}</td>
+      <td><input type="number" min="0" max="100" id="${idBase}_q1" value="${q1}"></td>
+      <td><input type="number" min="0" max="100" id="${idBase}_q2" value="${q2}"></td>
+      <td><input type="number" min="0, max=100" id="${idBase}_q3" value="${q3}"></td>
+      <td><input type="number" min="0" max="100" id="${idBase}_q4" value="${q4}"></td>
+    </tr>`;
+  }
+  gradesInputsBody.innerHTML = html;
+}
+
+/* regenerate inputs when grade selector in modal changes */
+document.getElementById('f_grade').addEventListener('change', ()=> generateGradesInputsForForm(null, document.getElementById('f_grade').value));
+
+/* handle student form submit */
+document.getElementById('studentForm').addEventListener('submit', async function(e){
+  e.preventDefault();
+  const key = document.getElementById('edit_lrn_key').value;
+  const lrn = document.getElementById('f_lrn').value.trim();
+  if (!lrn) return alert('LRN is required');
+  if (!/^\d{12}$/.test(lrn)) return alert('LRN must be exactly 12 digits.');
+
+  // collect student object
+  const studentObj = {
+    lrn,
+    lastName: document.getElementById('f_last').value.trim(),
+    firstName: document.getElementById('f_first').value.trim(),
+    middleName: document.getElementById('f_middle').value.trim(),
+    suffix: document.getElementById('f_suffix').value.trim(),
+    name: document.getElementById('f_name').value.trim() || ([document.getElementById('f_last').value, document.getElementById('f_first').value].filter(Boolean).join(', ')),
+    gender: document.getElementById('f_gender').value.trim(),
+    gradeLevel: document.getElementById('f_grade').value.trim(),
+    section: document.getElementById('f_section').value.trim(),
+    schoolYear: document.getElementById('f_schoolyear').value.trim(),
+    adviser: document.getElementById('f_adviser').value.trim(),
+    grades: {}
+  };
+
+  // collect grades from inputs
+  const subjects = getSubjectsForGrade(studentObj.gradeLevel);
+  for (const sub of subjects) {
+    const idBase = 'f_' + sub.toLowerCase().replace(/\s+/g,'_').replace(/[^\w\-]/g,'');
+    const q1el = document.getElementById(idBase + '_q1');
+    const q2el = document.getElementById(idBase + '_q2');
+    const q3el = document.getElementById(idBase + '_q3');
+    const q4el = document.getElementById(idBase + '_q4');
+    const q1 = q1el ? q1el.value.trim() : '';
+    const q2 = q2el ? q2el.value.trim() : '';
+    const q3 = q3el ? q3el.value.trim() : '';
+    const q4 = q4el ? q4el.value.trim() : '';
+    studentObj.grades[sub] = {
+      q1: q1 === '' ? null : Number(q1),
+      q2: q2 === '' ? null : Number(q2),
+      q3: q3 === '' ? null : Number(q3),
+      q4: q4 === '' ? null : Number(q4)
+    };
+  }
+
+  // Save or update to IndexedDB (keyed by lrn)
+  await idbPut(STORE_STUDENTS, studentObj);
+  closeModal('studentModal');
+  if (document.getElementById('page-grade').classList.contains('active')) renderGradeTable();
+});
+
+/* View student record in modal */
+async function viewStudentRecord(lrn){
+  const s = await idbGet(STORE_STUDENTS, lrn);
+  if (!s) return alert('Not found');
+  renderStudentReportCard(s, 'viewContent');
+  openModal('viewModal');
+}
+
+/* Reusable report card renderer */
+function renderStudentReportCard(student, containerId){
+  const grades = student.grades || {};
+  function qVal(sub, q){ const v = grades[sub] && grades[sub]['q'+q]; return (v === null || v === undefined || v === '') ? null : Number(v); }
+  function avgOf(vals){ const nums = vals.filter(x => Number.isFinite(x)); if (!nums.length) return null; const sum = nums.reduce((a,b)=>a+b,0); return round(sum / nums.length, decimalPlaces); }
+
+  const subjects = getSubjectsForGrade(student.gradeLevel);
+  const rows = [];
+  for (const sub of subjects) {
+    const q1 = qVal(sub,1), q2 = qVal(sub,2), q3 = qVal(sub,3), q4 = qVal(sub,4);
+    if ((sub.toLowerCase().includes('arabic') || sub.toLowerCase().includes('islamic')) && [q1,q2,q3,q4].every(v => v === null)) {
+      rows.push({ subject: sub, q1:null,q2:null,q3:null,q4:null, avg:null, remark:'— (optional, no grades)' });
+      continue;
+    }
+    const avg = avgOf([q1,q2,q3,q4]);
+    const remark = (avg === null) ? '—' : (avg >= 75 ? 'Passed' : 'Failed');
+    rows.push({ subject: sub, q1,q2,q3,q4, avg, remark });
+  }
+
+  function finalQuarter(q){
+    const vals = [];
+    for (const r of rows) {
+      const v = r['q'+q];
+      if (Number.isFinite(v)) vals.push(v);
+    }
+    if (!vals.length) return null;
+    return round(vals.reduce((a,b)=>a+b,0) / vals.length, decimalPlaces);
+  }
+  const final_q1 = finalQuarter(1), final_q2 = finalQuarter(2), final_q3 = finalQuarter(3), final_q4 = finalQuarter(4);
+  const subjAverages = rows.map(r => r.avg).filter(v => Number.isFinite(v));
+  const overallAvg = subjAverages.length ? round(subjAverages.reduce((a,b)=>a+b,0)/subjAverages.length, decimalPlaces) : null;
+  const overallRemark = overallAvg === null ? '—' : (overallAvg >= 75 ? 'Passed' : 'Failed');
+
+  let nameDisplay = student.name || ([student.lastName, student.firstName].filter(Boolean).join(', '));
+  let html = `<div>
+    <h3 style="text-align:center">${escapeHtml(nameDisplay)}</h3>
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px">
+      <div>LRN: ${escapeHtml(student.lrn||'')}</div>
+      <div>Grade/Section: ${escapeHtml(student.gradeLevel||'')} / ${escapeHtml(student.section||'')}</div>
+      <div>School Year: ${escapeHtml(student.schoolYear||'')}</div>
+    </div>
+    <table style="width:100%;border-collapse:collapse">
+      <thead>
+        <tr>
+          <th style="border:1px solid #ddd;padding:6px;text-align:left">Subject</th>
+          <th style="border:1px solid #ddd;padding:6px">1st</th>
+          <th style="border:1px solid #ddd;padding:6px">2nd</th>
+          <th style="border:1px solid #ddd;padding:6px">3rd</th>
+          <th style="border:1px solid #ddd;padding:6px">4th</th>
+          <th style="border:1px solid #ddd;padding:6px">Average</th>
+          <th style="border:1px solid #ddd;padding:6px">Remark</th>
+        </tr>
+      </thead>
+      <tbody>`;
+
+  for (const r of rows) {
+    html += `<tr>
+      <td style="text-align:left;padding:6px;border:1px solid #ddd">${escapeHtml(r.subject)}</td>
+      <td style="padding:6px;border:1px solid #ddd">${r.q1===null?'—':r.q1}</td>
+      <td style="padding:6px;border:1px solid #ddd">${r.q2===null?'—':r.q2}</td>
+      <td style="padding:6px;border:1px solid #ddd">${r.q3===null?'—':r.q3}</td>
+      <td style="padding:6px;border:1px solid #ddd">${r.q4===null?'—':r.q4}</td>
+      <td style="padding:6px;border:1px solid #ddd">${r.avg===null?'—':r.avg}</td>
+      <td style="padding:6px;border:1px solid #ddd">${escapeHtml(r.remark)}</td>
+    </tr>`;
+  }
+
+  html += `</tbody></table>
+    <div style="display:flex;justify-content:flex-end;margin-top:10px">
+      <div style="text-align:right">
+        <div>Final Q1: ${final_q1===null?'—':final_q1}</div>
+        <div>Final Q2: ${final_q2===null?'—':final_q2}</div>
+        <div>Final Q3: ${final_q3===null?'—':final_q3}</div>
+        <div>Final Q4: ${final_q4===null?'—':final_q4}</div>
+        <div style="margin-top:6px;font-weight:700">Overall Average: ${overallAvg===null?'—':overallAvg}</div>
+        <div>Final Remark: ${overallRemark}</div>
+      </div>
+    </div>
+  </div>`;
+
+  if (containerId === 'viewContent') {
+    document.getElementById(containerId).innerHTML = html;
+  } else {
+    document.getElementById(containerId).innerHTML = `<div class="card">${html}</div>`;
+  }
+}
+
+/* Open modal helper */
+function openModal(id){
+  document.getElementById(id).style.display = 'flex';
+}
+
+/* Close modal helper */
+function closeModal(id){
+  document.getElementById(id).style.display = 'none';
+}
+
+/* ===========================
+   Export / Import placeholders
+   =========================== */
+function exportAllCSV(){
+  idbGetAll(STORE_STUDENTS).then(all => {
+    if (!all || !all.length) { alert('No students to export'); return; }
+    const rows = [['LRN','Name','Grade','Section','Adviser','SchoolYear']];
+    for (const s of all) rows.push([s.lrn, s.name || '', s.gradeLevel || '', s.section || '', s.adviser || '', s.schoolYear || '']);
+    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'students_export.csv'; a.click();
+    URL.revokeObjectURL(url);
+  });
+}
+
+function exportGrade(){
+  if (!currentGradeContext) return alert('Open a grade dashboard first');
+  idbGetAll(STORE_STUDENTS).then(all => {
+    const list = all.filter(s => String(s.gradeLevel) === String(currentGradeContext));
+    if (!list.length) { alert('No students in this grade'); return; }
+    const rows = [['LRN','Name','Section','Adviser','SchoolYear']];
+    for (const s of list) rows.push([s.lrn, s.name || '', s.section || '', s.adviser || '', s.schoolYear || '']);
+    const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `grade_${currentGradeContext}_export.csv`; a.click();
+  URL.revokeObjectURL(url);
+  });
+}
+
+function gradeUploadExcel(){
+  const el = document.getElementById('gradeUpload');
+  if (!el.files || !el.files.length) return alert('Select an Excel file first');
+  document.getElementById('uploadStatus').textContent = 'Excel upload selected. Implement parsing as needed.';
+}
+
+/* Purge all students (admin action) */
+async function purgeAll(){
+  if (!confirm('Purge ALL student records? This cannot be undone.')) return;
+  const all = await idbGetAll(STORE_STUDENTS);
+  for (const s of all) await idbDelete(STORE_STUDENTS, s.lrn);
+  alert('All student records deleted.');
+  renderGradeTable();
+}
+
+/* Small migration from localStorage if present */
+async function migrateFromLocalStorage() {
+  try {
+    const lsStudents = JSON.parse(localStorage.getItem('ez_students_all') || '[]');
+    const lsAccounts = JSON.parse(localStorage.getItem('ez_student_accounts_v2') || '{}');
+    const lsTeachers = JSON.parse(localStorage.getItem('ez_teachers_v2') || '[]');
+    const lsAdmins = JSON.parse(localStorage.getItem('ez_admins_v2') || '[]');
+
+    for (const s of lsStudents || []) {
+      if (s.lrn) await idbPut(STORE_STUDENTS, s);
+    }
+    for (const lrn of Object.keys(lsAccounts || {})) {
+      const acct = { lrn, password: lsAccounts[lrn].password };
+      await idbPut(STORE_STUDENT_ACCOUNTS, acct);
+    }
+    for (const t of lsTeachers || []) {
+      if (t.email) await idbPut(STORE_TEACHERS, t);
+    }
+    for (const a of lsAdmins || []) {
+      if (a.email) await idbPut(STORE_ADMINS, a);
+    }
+  } catch(e){
+    console.warn('Migration skipped or failed:', e);
+  }
+}
+
+/* Expose helper functions for inline calls */
+window.showLanding = showLanding;
+window.openGradeDashboard = openGradeDashboard;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.showForgotPasswordModal = showForgotPasswordModal;
+
+</script>
+</body>
+</html>

@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PCCAES Dashboard - Fixed Issues</title>
+<style>
+:root {
+  --primary: #2b6cb0;
+  --primary-dark: #1e4e7e;
+  --secondary: #ffcc00;
+  --secondary-dark: #e6b800;
+  --dark: #2d3748;
+  --light: #f0f4f8;
+  --success: #48bb78;
+  --success-dark: #38a169;
+  --danger: #e53e3e;
+  --danger-dark: #c53030;
+  --warning: #faf089;
+  --warning-dark: #ecc94b;
+}
+
+body { 
+  margin:0; 
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+  display:flex; 
+  flex-direction:column; 
+  min-height:100vh; 
+  background:var(--light); 
+}
+
+header { 
+  background: var(--primary); 
+  color: white; 
+  padding: 15px; 
+  font-size: 20px; 
+  font-weight: bold; 
+  position: relative; 
+  display:flex; 
+  align-items:center; 
+  justify-content:space-between; 
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+header .school-name { 
+  margin-left:40px; 
+  text-align: center;
+  flex: 1;
+}
+
+.top-right { 
+  display:flex; 
+  gap:10px; 
+  align-items:center; 
+}
+
+.top-right span { 
+  font-weight:bold; 
+}
+
+.top-right button { 
+  padding:8px 15px; 
+  border:none; 
+  background:var(--secondary); 
+  color:black; 
+  font-weight:bold; 
+  cursor:pointer; 
+  border-radius:5px; 
+  transition:0.3s; 
+}
+
+.top-right button:hover { 
+  background:var(--secondary-dark); 
+  transform: translateY(-2px);
+}
+
+.hamburger { 
+  display:none; 
+  font-size:24px; 
+  cursor:pointer; 
+  position:absolute; 
+  left:15px; 
+  z-index: 1001;
+}
+
+.container { 
+  display:flex; 
+  flex:1; 
+}
+
+.sidebar { 
+  width:250px; 
+  background:var(--dark); 
+  color:white; 
+  padding-top:10px; 
+  display:flex; 
+  flex-direction:column; 
+  justify-content:space-between; 
+  transition: transform 0.3s ease;
+  box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+
+.sidebar-top { 
+  flex:1; 
+  overflow-y: auto;
+  max-height: calc(100vh - 150px);
+}
+
+.sidebar button { 
+  display:block; 
+  width:100%; 
+  padding:12px 15px; 
+  border:none; 
+  background:none; 
+  color:white; 
+  text-align:left; 
+  cursor:pointer; 
+  transition:all 0.2s; 
+  font-size: 15px;
+  border-left: 3px solid transparent;
+}
+
+.sidebar button:hover { 
+  background:#4a5568; 
+}
+
+.sidebar button.active { 
+  background:var(--primary); 
+  font-weight:bold; 
+  border-left: 3px solid var(--secondary);
+}
+
+.submenu { 
+  display:none; 
+  padding-left:15px; 
+}
+
+.submenu button { 
+  background:#4a5568; 
+  font-size: 14px;
+  padding: 10px 15px;
+}
+
+.submenu button:hover { 
+  background:#718096; 
+}
+
+.content { 
+  flex:1; 
+  padding:20px; 
+  text-align:center; 
+  overflow-y: auto;
+}
+
+.dashboard-buttons { 
+  display:flex; 
+  flex-wrap:wrap; 
+  justify-content:center; 
+  gap:20px; 
+  margin-top:20px; 
+}
+
+.db-button { 
+  position:relative; 
+  background:linear-gradient(135deg, #4299e1, var(--primary)); 
+  color:white; 
+  border:none; 
+  padding:15px 10px; 
+  cursor:pointer; 
+  border-radius:10px; 
+  font-weight:bold; 
+  transition:all 0.3s; 
+  min-width: 100px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  word-break: break-word;
+}
+
+.db-button:hover { 
+  transform: translateY(-5px); 
+  box-shadow:0 6px 12px rgba(0,0,0,0.15);
+}
+
+.delete-btn { 
+  position:absolute; 
+  top:5px; 
+  right:5px; 
+  background:var(--danger); 
+  color:white; 
+  border:none; 
+  font-size:12px; 
+  width:20px;
+  height:20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor:pointer; 
+  border-radius:50%; 
+  transition: 0.3s;
+}
+
+.delete-btn:hover {
+  background: var(--danger-dark);
+  transform: scale(1.1);
+}
+
+.undo-box { 
+  margin-bottom:15px; 
+  padding:12px; 
+  background:var(--warning); 
+  border:1px solid var(--warning-dark); 
+  border-radius:5px; 
+  display:flex; 
+  justify-content:center; 
+  align-items:center; 
+  gap:10px; 
+  animation: fadeIn 0.5s;
+}
+
+.undo-box button { 
+  background:var(--warning-dark); 
+  color:black; 
+  border:none; 
+  padding:5px 15px; 
+  cursor:pointer; 
+  border-radius:3px; 
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.undo-box button:hover {
+  background: #d69e2e;
+}
+
+.add-button-box { 
+  margin-top:30px; 
+  display:flex; 
+  justify-content:center; 
+  gap:15px; 
+  flex-wrap:wrap; 
+  background: white;
+  padding: 5px;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.add-button-box input, .add-button-box select { 
+  padding:10px; 
+  border:1px solid #ccc; 
+  border-radius:5px; 
+  width:200px; 
+  transition: 0.3s;
+}
+
+.add-button-box input:focus, .add-button-box select:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.2);
+}
+
+.add-button-box button { 
+  padding:5px 5px; 
+  border:none; 
+  background:var(--success); 
+  color:white; 
+  cursor:pointer; 
+  border-radius:5px; 
+  font-weight:bold; 
+  transition:0.3s; 
+}
+
+.add-button-box button:hover { 
+  background:var(--success-dark);
+  transform: translateY(-2px);
+}
+
+footer { 
+  background:var(--dark); 
+  color:white; 
+  text-align:center; 
+  padding:15px; 
+  margin-top: auto;
+}
+
+#loginArea { 
+  position:fixed; 
+  top:0; 
+  left:0; 
+  width:100%; 
+  height:100%; 
+  background:var(--light); 
+  display:flex; 
+  justify-content:center; 
+  align-items:center; 
+  z-index:10000; 
+}
+
+.login-container { 
+  background:white; 
+  padding:40px; 
+  border-radius:10px; 
+  box-shadow:0 10px 25px rgba(0,0,0,0.1); 
+  width:400px; 
+  text-align:center; 
+  animation: slideUp 0.5s;
+}
+
+.login-container h2 {
+  margin-top: 0;
+  color: var(--primary);
+  margin-bottom: 25px;
+}
+
+input, select { 
+  width:100%; 
+  padding:12px; 
+  margin:10px 0; 
+  border:1px solid #ccc; 
+  border-radius:5px; 
+  box-sizing: border-box;
+  transition: 0.3s;
+}
+
+input:focus, select:focus {
+  border-color: var(--primary);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(43, 108, 176, 0.2);
+}
+
+button.loginBtn { 
+  width:100%; 
+  padding:12px; 
+  background:var(--primary); 
+  color:white; 
+  border:none; 
+  border-radius:5px; 
+  cursor:pointer; 
+  font-weight:bold; 
+  transition:0.3s; 
+  margin-top: 10px;
+}
+
+button.loginBtn:hover { 
+  background:var(--primary-dark);
+  transform: translateY(-2px);
+}
+
+.password-container {
+  position: relative;
+}
+
+.toggle-password {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #777;
+}
+
+/* Toast notification */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 15px 25px;
+  background: var(--dark);
+  color: white;
+  border-radius: 5px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: toastIn 0.5s, toastOut 0.5s 2.5s forwards;
+}
+
+.toast.success {
+  background: var(--success);
+}
+
+.toast.error {
+  background: var(--danger);
+}
+
+.toast.warning {
+  background: var(--warning);
+  color: #000;
+}
+
+/* Modal */
+.modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  z-index: 2000;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: white;
+  padding: 30px;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #777;
+}
+
+.modal-body {
+  margin-bottom: 20px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s;
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--primary-dark);
+}
+
+.btn-secondary {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+.btn-secondary:hover {
+  background: #cbd5e0;
+}
+
+.btn-danger {
+  background: var(--danger);
+  color: white;
+}
+
+.btn-danger:hover {
+  background: var(--danger-dark);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toastIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toastOut {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+}
+
+/* Responsive styles */
+@media(max-width: 992px){
+  .sidebar { 
+    width:220px; 
+  }
+  
+  .db-button {
+    min-width: 160px;
+    padding: 15px 20px;
+  }
+}
+
+@media(max-width: 768px){
+  .container { 
+    flex-direction:column; 
+  }
+  
+  .sidebar { 
+    width:100%; 
+    transform:translateX(-100%); 
+    position:fixed; 
+    z-index:1000; 
+    top:0; 
+    left:0;
+    height: 100vh;
+    padding-top: 60px;
+  }
+  
+  .sidebar.visible { 
+    transform:translateX(0); 
+  }
+  
+  .hamburger { 
+    display:block; 
+  }
+  
+  .content { 
+    padding:80px 15px 15px; 
+  }
+  
+  .school-name {
+    margin-left: 0;
+    font-size: 18px;
+  }
+  
+  .add-button-box {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .add-button-box input, .add-button-box select {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+@media(max-width: 576px){
+  .dashboard-buttons {
+    gap: 15px;
+  }
+  
+  .db-button {
+    width: 100%;
+    max-width: 300px;
+  }
+  
+  .login-container {
+    width: 90%;
+    padding: 25px;
+  }
+  
+  .top-right span {
+    display: none;
+  }
+}
+
+.empty-state {
+  padding: 40px;
+  text-align: center;
+  color: #718096;
+  font-style: italic;
+}
+
+.csv-instructions {
+  background: #f7fafc;
+  padding: 15px;
+  border-radius: 5px;
+  margin: 15px 0;
+  text-align: left;
+}
+
+.csv-instructions h4 {
+  margin-top: 0;
+}
+
+.csv-instructions code {
+  background: #edf2f7;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.login-error {
+  color: var(--danger);
+  margin: 10px 0;
+  font-size: 14px;
+  display: none;
+  background: #fee;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #fcc;
+}
+
+.admin-info {
+  background: #e6fffa;
+  border-left: 4px solid #38b2ac;
+  padding: 12px 15px;
+  margin: 15px 0;
+  text-align: left;
+  border-radius: 4px;
+}
+
+.admin-info h4 {
+  margin: 0 0 8px 0;
+  color: #2c7a7b;
+}
+
+.admin-info p {
+  margin: 5px 0;
+  font-size: 14px;
+}
+
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 2px solid var(--primary);
+}
+
+.category-title {
+  color: var(--primary);
+  margin: 0;
+}
+
+.category-badge {
+  background: var(--primary);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 14px;
+}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="hamburger" onclick="toggleSidebar()">☰</span>
+  <span class="school-name">Pres. Corazon C. Aquino Elementary School Dashboard</span>
+  <div class="top-right">
+    <span id="welcomeUser"></span>
+    <button onclick="logout()">Logout</button>
+  </div>
+</header>
+
+<!-- LOGIN FORM -->
+<div id="loginArea">
+  <div class="login-container">
+    <h2>Login</h2>
+    <input type="email" id="email" placeholder="Enter your DepEd QC email" required>
+    
+    <div class="password-container">
+      <input type="password" id="password" placeholder="Enter password" required>
+      <button type="button" class="toggle-password" onclick="togglePasswordVisibility()">👁️</button>
+    </div>
+    
+    <select id="gradeLevel">
+      <option value="">Select Grade Level</option>
+      <option value="grade1">Grade 1</option>
+      <option value="grade2">Grade 2</option>
+      <option value="grade3">Grade 3</option>
+      <option value="grade4">Grade 4</option>
+      <option value="grade5">Grade 5</option>
+      <option value="grade6">Grade 6</option>
+      <option value="SPET">SPET</option>
+      <option value="Kinder">Kinder</option>
+      <option value="Admin">Admin</option>
+    </select>
+    
+    <div id="loginError" class="login-error">Invalid credentials. Please check your email, password, and access level.</div>
+    
+    <button class="loginBtn" onclick="login()">Login</button>
+  </div>
+</div>
+
+<div class="container" id="dashboardContainer" style="display:none;">
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-top" id="sidebarTop"></div>
+  </div>
+
+  <div class="content">
+    <div class="category-header">
+      <h2 id="sectionTitle" class="category-title">Welcome to the Dashboard</h2>
+      <span id="categoryBadge" class="category-badge" style="display: none;">Category</span>
+    </div>
+    <div id="undoArea"></div>
+    
+    <div class="add-button-box">
+      <input type="text" id="newButtonName" placeholder="Button Name">
+      <input type="text" id="newButtonLink" placeholder="Google Sheet Link">
+      <select id="buttonCategory">
+        <option value="pupils">List of Pupils</option>
+        <option value="enrollment">Enrollment</option>
+        <option value="teachers">Teachers Profile</option>
+        <option value="records">Student Records</option>
+        <option value="forms">Forms</option>
+        <option value="resources">Resource Materials</option>
+        <option value="chart">Chart</option>
+
+        <!-- Class Record Subjects -->
+        <option value="filipino">Filipino</option>
+        <option value="english">English</option>
+        <option value="mathematics">Mathematics</option>
+        <option value="science">Science</option>
+        <option value="araling_panlipunan">Araling Panlipunan</option>
+        <option value="epp">EPP</option>
+        <option value="music">Music</option>
+        <option value="arts">Arts</option>
+        <option value="pe">Physical Education</option>
+        <option value="health">Health</option>
+        <option value="grmc">GMRC</option>
+        <option value="arabic_language">Arabic Language</option>
+        <option value="islamic_values">Islamic Values Education</option>
+        <option value="reading_literacy">Reading and Literacy</option>
+        <option value="language">Language</option>
+        <option value="makabansa">Makabansa</option>
+        <option value="esp">ESP</option>
+      </select>
+      <button onclick="addNewDashboardButton()">Add Button</button>
+    </div>
+    
+    <div id="dashboardArea" class="dashboard-buttons"></div>
+  </div>
+</div>
+
+<!-- Modal for CSV Upload -->
+<div id="csvModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Upload Users CSV</h3>
+      <button class="modal-close" onclick="closeModal('csvModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="csv-instructions">
+        <h4>CSV Format Instructions:</h4>
+        <p>Your CSV file should have the following columns:</p>
+        <ul>
+          <li><strong>Name</strong>: User's full name</li>
+          <li><strong>Email</strong>: Must end with @depedqc.ph</li>
+          <li><strong>Password</strong>: Plain text password</li>
+          <li><strong>Grades</strong>: Pipe-separated list of grade access (grade1|grade2|Admin)</li>
+        </ul>
+        <p>Example:</p>
+        <code>John Doe,john.doe@depedqc.ph,password123,grade1|grade2|Admin</code>
+      </div>
+      <input type="file" id="csvFile" accept=".csv">
+      <div id="csvPreview" style="margin-top: 15px; max-height: 200px; overflow-y: auto;"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('csvModal')">Cancel</button>
+      <button class="btn btn-primary" onclick="processCSV()">Upload Users</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for User Management -->
+<div id="usersModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>User Management</h3>
+      <button class="modal-close" onclick="closeModal('usersModal')">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div style="margin-bottom: 15px;">
+        <button class="btn btn-primary" onclick="showAddUserForm()">Add New User</button>
+        <button class="btn btn-secondary" onclick="uploadUsersCSV()">Upload CSV</button>
+      </div>
+      <div id="usersList" style="max-height: 300px; overflow-y: auto;"></div>
+      <div id="addUserForm" style="display: none; margin-top: 20px; padding: 15px; background: #f7fafc; border-radius: 5px;">
+        <h4>Add New User</h4>
+        <input type="text" id="newUserName" placeholder="Full Name" style="margin-bottom: 10px;">
+        <input type="email" id="newUserEmail" placeholder="Email" style="margin-bottom: 10px;">
+        <input type="password" id="newUserPassword" placeholder="Password" style="margin-bottom: 10px;">
+        <div>
+          <label>Grade Access:</label>
+          <div style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px;">
+            <label><input type="checkbox" name="grades" value="grade1"> Grade 1</label>
+            <label><input type="checkbox" name="grades" value="grade2"> Grade 2</label>
+            <label><input type="checkbox" name="grades" value="grade3"> Grade 3</label>
+            <label><input type="checkbox" name="grades" value="grade4"> Grade 4</label>
+            <label><input type="checkbox" name="grades" value="grade5"> Grade 5</label>
+            <label><input type="checkbox" name="grades" value="grade6"> Grade 6</label>
+            <label><input type="checkbox" name="grades" value="SPET"> SPET</label>
+            <label><input type="checkbox" name="grades" value="Kinder"> Kinder</label>
+            <label><input type="checkbox" name="grades" value="Admin"> Admin</label>
+          </div>
+        </div>
+        <div style="margin-top: 15px;">
+          <button class="btn btn-primary" onclick="addNewUser()">Save User</button>
+          <button class="btn btn-secondary" onclick="cancelAddUser()">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>Pres. Corazon C. Aquino Elementary School © 2025</footer>
+
+<script>
+// Simple password hashing for demo
+function simpleHash(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash |= 0;
+  }
+  return hash.toString();
+}
+
+let lastDeleted = null;
+let activeSidebarButton = null;
+let currentCategory = null;
+
+// Get users from localStorage or initialize with default users
+function getAllowedUsers() {
+  const storedUsers = localStorage.getItem('allowedUsers');
+  if (storedUsers) {
+    return JSON.parse(storedUsers);
+  }
+  
+  // Default users if none exist in storage
+  return [
+    { name:"Manuel Cayao", email:"manuel.cayao@depedqc.ph", password:simpleHash("pass1234"), grades:["grade1","grade2","grade3","grade4","grade5","grade6","SPET","Kinder","Admin"] },
+    { name:"Manuel Cayao", email:"manny@depedqc.ph", password:simpleHash("1234"), grades:["grade1"] },
+    { name:"Glenda Garcia", email:"glend.garcia@depedqc.ph", password:simpleHash("pass123"), grades:["grade6"] }
+  ];
+}
+
+// Save users to localStorage
+function saveAllowedUsers(users) {
+  localStorage.setItem('allowedUsers', JSON.stringify(users));
+}
+
+// Show toast notification
+function showToast(message, type = '') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+// Toggle password visibility
+function togglePasswordVisibility() {
+  const passwordInput = document.getElementById('password');
+  const toggleButton = document.querySelector('.toggle-password');
+  
+  if (passwordInput.type === 'password') {
+    passwordInput.type = 'text';
+    toggleButton.textContent = '🔒';
+  } else {
+    passwordInput.type = 'password';
+    toggleButton.textContent = '👁️';
+  }
+}
+
+// Modal functions
+function openModal(id) {
+  document.getElementById(id).style.display = 'flex';
+}
+
+function closeModal(id) {
+  document.getElementById(id).style.display = 'none';
+}
+
+// ----- LOGIN -----
+function login(){
+  const email = document.getElementById('email').value.trim().toLowerCase();
+  const password = document.getElementById('password').value.trim();
+  const gradeLevel = document.getElementById('gradeLevel').value;
+  const loginError = document.getElementById('loginError');
+
+  // Hide error message initially
+  loginError.style.display = 'none';
+  loginError.textContent = '';
+
+  // Validate required fields
+  if(!email || !password || !gradeLevel){ 
+    loginError.textContent = "Please fill in all fields: email, password, and grade level.";
+    loginError.style.display = 'block';
+    return; 
+  }
+  
+  // Validate email format
+  if(!email.endsWith("@depedqc.ph")){ 
+    loginError.textContent = "Email must be a valid DepEd QC email (must end with @depedqc.ph).";
+    loginError.style.display = 'block';
+    return; 
+  }
+
+  const allowedUsers = getAllowedUsers();
+  const hashedPassword = simpleHash(password);
+  
+  // Check if user exists with the provided email
+  const userWithEmail = allowedUsers.find(u => u.email.toLowerCase() === email);
+  
+  if (!userWithEmail) {
+    loginError.textContent = "This email is not registered in the system. Please contact your administrator.";
+    loginError.style.display = 'block';
+    return;
+  }
+  
+  // Check if password matches
+  if (userWithEmail.password !== hashedPassword) {
+    loginError.textContent = "Incorrect password. Please try again.";
+    loginError.style.display = 'block';
+    return;
+  }
+  
+  // Check if user has access to the selected grade level
+  if (!userWithEmail.grades.includes(gradeLevel)) {
+    loginError.textContent = "You don't have access to this grade level. Please select a different one.";
+    loginError.style.display = 'block';
+    return;
+  }
+  
+  // If all checks pass, log the user in
+  localStorage.setItem("username", userWithEmail.name);
+  localStorage.setItem("userGrades", JSON.stringify(userWithEmail.grades));
+  localStorage.setItem("currentGrade", gradeLevel);
+
+  document.getElementById("loginArea").style.display = "none";
+  document.getElementById("dashboardContainer").style.display = "flex";
+
+  if(userWithEmail.name.toLowerCase() === "manuel cayao" && gradeLevel === "Admin") {
+    loadAdminMenu();
+    document.getElementById("welcomeUser").textContent = `${userWithEmail.name}, Admin Dashboard`;
+  } else {
+    loadTeacherMenu(gradeLevel);
+    document.getElementById("welcomeUser").textContent = `${userWithEmail.name}, ${gradeLevel.toUpperCase()} Dashboard`;
+  }
+
+  showToast("Login successful!", "success");
+}
+
+// ----- LOGOUT -----
+function logout(){ 
+  if(confirm("Are you sure you want to logout?")){ 
+    localStorage.removeItem("username");
+    localStorage.removeItem("userGrades");
+    localStorage.removeItem("currentGrade");
+    window.location.reload(); 
+  } 
+}
+
+// ----- SIDEBAR -----
+function toggleSidebar(){
+  const sidebar = document.getElementById('sidebar');
+  sidebar.classList.toggle('visible');
+}
+
+function toggleSubmenu(id){
+  const menu = document.getElementById(id); 
+  menu.style.display = menu.style.display === "block" ? "none" : "block";
+}
+
+function highlightSidebarButton(button){
+  document.querySelectorAll('.sidebar button').forEach(btn => btn.classList.remove('active')); 
+  if(button) button.classList.add('active'); 
+  activeSidebarButton = button;
+}
+
+// ----- TEACHER MENU -----
+function loadTeacherMenu(grade){
+  const sidebarTop = document.getElementById("sidebarTop");
+  let classRecordHTML = '';
+  
+  if(grade === "grade1" || grade === "grade2"){ 
+    classRecordHTML = `
+      <button onclick="openMenu('Reading and Literacy')">Reading and Literacy</button>
+      <button onclick="openMenu('Language')">Language</button>
+      <button onclick="openMenu('Mathematics')">Mathematics</button>
+      <button onclick="openMenu('Makabansa')">Makabansa</button>
+      <button onclick="openMenu('GMRC')">GMRC</button>
+      <button onclick="openMenu('Arabic Language')">Arabic Language</button>
+      <button onclick="openMenu('Islamic Values Education')">Islamic Values Education</button>
+    `;
+  } else if(grade === "grade3"){ 
+    classRecordHTML = `
+      <button onclick="openMenu('Filipino')">Filipino</button>
+      <button onclick="openMenu('English')">English</button>
+      <button onclick="openMenu('Mathematics')">Mathematics</button>
+      <button onclick="openMenu('Science')">Science</button>
+      <button onclick="openMenu('Araling Panlipunan')">Araling Panlipunan</button>
+      <button onclick="openMenu('EPP')">EPP</button>
+      <button onclick="toggleSubmenu('mapeh')">MAPEH ▾</button>
+      <div id="mapeh" class="submenu">
+        <button onclick="openMenu('Music and Arts')">Music and Arts</button>
+        <button onclick="openMenu('PE and Health')">PE and Health</button>
+      </div>
+      <button onclick="openMenu('GMRC')">GMRC</button>
+      <button onclick="openMenu('Arabic Language')">Arabic Language</button>
+      <button onclick="openMenu('Islamic Values Education')">Islamic Values Education</button>
+    `;
+  } else if(grade === "grade4" || grade === "grade5"){ 
+    classRecordHTML = `
+      <button onclick="openMenu('Filipino')">Filipino</button>
+      <button onclick="openMenu('English')">English</button>
+      <button onclick="openMenu('Mathematics')">Mathematics</button>
+      <button onclick="openMenu('Science')">Science</button>
+      <button onclick="openMenu('Araling Panlipunan')">Araling Panlipunan</button>
+      <button onclick="openMenu('EPP')">EPP</button>
+      <button onclick="toggleSubmenu('mapeh')">MAPEH ▾</button>
+      <div id="mapeh" class="submenu">
+        <button onclick="openMenu('Music')">Music</button>
+        <button onclick="openMenu('Arts')">Arts</button>
+        <button onclick="openMenu('PE')">PE</button>
+        <button onclick="openMenu('Health')">Health</button>
+      </div>
+      <button onclick="openMenu('GMRC')">GMRC</button>
+      <button onclick="openMenu('Arabic Language')">Arabic Language</button>
+      <button onclick="openMenu('Islamic Values Education')">Islamic Values Education</button>
+    `;
+  } else if(grade === "grade6"){ 
+    classRecordHTML = `
+      <button onclick="openMenu('Filipino')">Filipino</button>
+      <button onclick="openMenu('English')">English</button>
+      <button onclick="openMenu('Mathematics')">Mathematics</button>
+      <button onclick="openMenu('Science')">Science</button>
+      <button onclick="openMenu('Araling Panlipunan')">Araling Panlipunan</button>
+      <button onclick="openMenu('EPP')">EPP</button>
+      <button onclick="toggleSubmenu('mapeh')">MAPEH ▾</button>
+      <div id="mapeh" class="submenu">
+        <button onclick="openMenu('Music')">Music</button>
+        <button onclick="openMenu('Arts')">Arts</button>
+        <button onclick="openMenu('PE')">PE</button>
+        <button onclick="openMenu('Health')">Health</button>
+      </div>
+      <button onclick="openMenu('ESP')">ESP</button>
+      <button onclick="openMenu('Arabic Language')">Arabic Language</button>
+      <button onclick="openMenu('Islamic Values Education')">Islamic Values Education</button>
+    `;
+  } else if(grade === "SPET" || grade === "Kinder"){ 
+    classRecordHTML = `
+      <button onclick="openMenu('Reading and Literacy')">Reading and Literacy</button>
+      <button onclick="openMenu('Mathematics')">Mathematics</button>
+      <button onclick="openMenu('ESP')">ESP</button>
+      <button onclick="openMenu('Music and Arts')">Music and Arts</button>
+      <button onclick="openMenu('PE')">PE</button>
+      <button onclick="openMenu('GMRC')">GMRC</button>
+      <button onclick="openMenu('Arabic Language')">Arabic Language</button>
+      <button onclick="openMenu('Islamic Values Education')">Islamic Values Education</button>
+    `;
+  }
+
+  sidebarTop.innerHTML = `
+    <button onclick="openMenu('pupils')">📋 List of Pupils</button>
+    <button onclick="openMenu('enrollment')">📝 Enrollment</button>
+    <button onclick="openMenu('teachers')">👩‍🏫 Teachers Profile</button>
+    <button onclick="openMenu('records')">📂 Student Records</button>
+    <button onclick="toggleSubmenu('classRecord')">📚 Class Record ▾</button>
+    <div id="classRecord" class="submenu">${classRecordHTML}</div>
+    <button onclick="openMenu('forms')">📑 Forms</button>
+    <button onclick="openMenu('Organizational Chart')">🏫 Organizational Chart</button>
+    <button onclick="openMenu('resources')">📚 Resource Materials</button>
+  `;
+}
+
+// ----- ADMIN MENU -----
+function loadAdminMenu(){
+  const sidebarTop = document.getElementById("sidebarTop");
+  sidebarTop.innerHTML = `
+    <button onclick="openMenu('teachersProfile')">👩‍🏫 Teacher's Profile</button>
+    <button onclick="openMenu('forms')">📑 Forms</button>
+    <button onclick="openMenu('enrollment')">📝 Enrollment</button>
+    <button onclick="openMenu('serviceRecord')">📂 Service Record</button>
+    <button onclick="openMenu('reports')">📊 Reports</button>
+    <button onclick="openMenu('utilities')">⚙️ Utilities</button>
+    <button onclick="openMenu('orgChart')">🏫 Organizational Chart</button>
+    <button onclick="showAllUsers()">👥 Show All Users</button>
+    <button onclick="uploadUsersCSV()">⬆️ Upload Users CSV</button>
+    <button onclick="downloadUsersCSV()">⬇️ Download Users CSV</button>
+  `;
+}
+
+// ----- CSV Upload / Download -----
+function uploadUsersCSV(){
+  openModal('csvModal');
+}
+
+function processCSV() {
+  const fileInput = document.getElementById('csvFile');
+  const preview = document.getElementById('csvPreview');
+  
+  if (!fileInput.files.length) {
+    showToast("Please select a CSV file.", "error");
+    return;
+  }
+  
+  const file = fileInput.files[0];
+  const reader = new FileReader();
+  
+  reader.onload = function(e) {
+    const text = e.target.result;
+    const lines = text.split(/\r?\n/).filter(line => line.trim());
+    
+    preview.innerHTML = '<h4>Preview (first 5 rows):</h4>';
+    const table = document.createElement('table');
+    table.style.width = '100%';
+    table.style.borderCollapse = 'collapse';
+    table.style.marginTop = '10px';
+    
+    // Process and preview
+    for (let i = 0; i < Math.min(5, lines.length); i++) {
+      const row = document.createElement('tr');
+      const cells = lines[i].split(',');
+      
+      cells.forEach(cell => {
+        const td = document.createElement('td');
+        td.textContent = cell;
+        td.style.border = '1px solid #ccc';
+        td.style.padding = '5px';
+        row.appendChild(td);
+      });
+      
+      table.appendChild(row);
+    }
+    
+    preview.appendChild(table);
+    
+    // Process all data
+    const allowedUsers = getAllowedUsers();
+    let addedCount = 0;
+    let updatedCount = 0;
+    
+    for (let i = 0; i < lines.length; i++) {
+      if (!lines[i].trim()) continue;
+      
+      const [name, email, password, gradesStr] = lines[i].split(',');
+      if (name && email && password) {
+        const grades = gradesStr ? gradesStr.split('|').map(g => g.trim()) : [];
+        const hashedPassword = simpleHash(password.trim());
+        const existingIndex = allowedUsers.findIndex(u => u.email === email.trim());
+        
+        if (existingIndex !== -1) {
+          allowedUsers[existingIndex] = {
+            name: name.trim(),
+            email: email.trim(),
+            password: hashedPassword,
+            grades
+          };
+          updatedCount++;
+        } else {
+          allowedUsers.push({
+            name: name.trim(),
+            email: email.trim(),
+            password: hashedPassword,
+            grades
+          });
+          addedCount++;
+        }
+      }
+    }
+    
+    // Save the updated users list
+  saveAllowedUsers(allowedUsers);
+    
+    showToast(`Users processed successfully! Added: ${addedCount}, Updated: ${updatedCount}`, 'success');
+    closeModal('csvModal');
+  };
+  
+  reader.readAsText(file);
+}
+
+function downloadUsersCSV(){
+  const allowedUsers = getAllowedUsers();
+  const csvContent = allowedUsers.map(u => {
+    const gradesStr = u.grades.join('|');
+    return `${u.name},${u.email},${u.password},${gradesStr}`;
+  }).join('\n');
+  
+  const blob = new Blob([csvContent], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'pccaes_users.csv';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  
+  showToast('Users CSV downloaded!', 'success');
+}
+
+// ----- USER MANAGEMENT -----
+function showAllUsers() {
+  openModal('usersModal');
+  renderUsersList();
+}
+
+function renderUsersList() {
+  const usersList = document.getElementById('usersList');
+  usersList.innerHTML = '<h4>Current Users:</h4>';
+  
+  const allowedUsers = getAllowedUsers();
+  
+  if (allowedUsers.length === 0) {
+    usersList.innerHTML += '<p>No users found.</p>';
+    return;
+  }
+  
+  const table = document.createElement('table');
+  table.style.width = '100%';
+  table.style.borderCollapse = 'collapse';
+  table.style.marginTop = '10px';
+  
+  // Header
+  const headerRow = document.createElement('tr');
+  ['Name', 'Email', 'Access', 'Actions'].forEach(text => {
+    const th = document.createElement('th');
+    th.textContent = text;
+    th.style.border = '1px solid #ccc';
+    th.style.padding = '8px';
+    th.style.textAlign = 'left';
+    th.style.backgroundColor = '#f7fafc';
+    headerRow.appendChild(th);
+  });
+  table.appendChild(headerRow);
+  
+  // Rows
+  allowedUsers.forEach((user, index) => {
+    const row = document.createElement('tr');
+    
+    // Name
+    const nameCell = document.createElement('td');
+    nameCell.textContent = user.name;
+    nameCell.style.border = '1px solid #ccc';
+    nameCell.style.padding = '8px';
+    row.appendChild(nameCell);
+    
+    // Email
+    const emailCell = document.createElement('td');
+    emailCell.textContent = user.email;
+    emailCell.style.border = '1px solid #ccc';
+    emailCell.style.padding = '8px';
+    row.appendChild(emailCell);
+    
+    // Access
+    const accessCell = document.createElement('td');
+    accessCell.textContent = user.grades.join(', ');
+    accessCell.style.border = '1px solid #ccc';
+    accessCell.style.padding = '8px';
+    row.appendChild(accessCell);
+    
+    // Actions
+    const actionsCell = document.createElement('td');
+    actionsCell.style.border = '1px solid #ccc';
+    actionsCell.style.padding = '8px';
+    
+    const editButton = document.createElement('button');
+    editButton.textContent = 'Edit';
+    editButton.className = 'btn btn-primary';
+    editButton.style.marginRight = '5px';
+    editButton.onclick = () => editUser(index);
+    actionsCell.appendChild(editButton);
+    
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'Delete';
+    deleteButton.className = 'btn btn-danger';
+    deleteButton.onclick = () => deleteUser(index);
+    actionsCell.appendChild(deleteButton);
+    
+    row.appendChild(actionsCell);
+    table.appendChild(row);
+  });
+  
+  usersList.appendChild(table);
+}
+
+function showAddUserForm() {
+  document.getElementById('addUserForm').style.display = 'block';
+}
+
+function cancelAddUser() {
+  document.getElementById('addUserForm').style.display = 'none';
+  document.getElementById('newUserName').value = '';
+  document.getElementById('newUserEmail').value = '';
+  document.getElementById('newUserPassword').value = '';
+  document.querySelectorAll('input[name="grades"]').forEach(cb => cb.checked = false);
+}
+
+function addNewUser() {
+  const name = document.getElementById('newUserName').value.trim();
+  const email = document.getElementById('newUserEmail').value.trim();
+  const password = document.getElementById('newUserPassword').value.trim();
+  
+  if (!name || !email || !password) {
+    showToast('Please fill all fields.', 'error');
+    return;
+  }
+  
+  if (!email.endsWith('@depedqc.ph')) {
+    showToast('Email must be a valid DepEd QC email.', 'error');
+    return;
+  }
+  
+  const selectedGrades = Array.from(document.querySelectorAll('input[name="grades"]:checked'))
+    .map(cb => cb.value);
+  
+  if (selectedGrades.length === 0) {
+    showToast('Please select at least one grade level.', 'error');
+    return;
+  }
+  
+  const allowedUsers = getAllowedUsers();
+  
+  // Check if email already exists
+  if (allowedUsers.some(user => user.email === email)) {
+    showToast('A user with this email already exists.', 'error');
+    return;
+  }
+  
+  allowedUsers.push({
+    name,
+    email,
+    password: simpleHash(password),
+    grades: selectedGrades
+  });
+  
+  saveAllowedUsers(allowedUsers);
+  showToast('User added successfully!', 'success');
+  cancelAddUser();
+  renderUsersList();
+}
+
+function editUser(index) {
+  const allowedUsers = getAllowedUsers();
+  const user = allowedUsers[index];
+  
+  document.getElementById('newUserName').value = user.name;
+  document.getElementById('newUserEmail').value = user.email;
+  document.getElementById('newUserPassword').value = ''; // Clear password field for security
+  
+  // Check the appropriate grade checkboxes
+  document.querySelectorAll('input[name="grades"]').forEach(cb => {
+    cb.checked = user.grades.includes(cb.value);
+  });
+  
+  showAddUserForm();
+  
+  // Replace the save button functionality for editing
+  const saveButton = document.querySelector('#addUserForm .btn-primary');
+  saveButton.textContent = 'Update User';
+  saveButton.onclick = function() {
+    updateUser(index);
+  };
+}
+
+function updateUser(index) {
+  const name = document.getElementById('newUserName').value.trim();
+  const email = document.getElementById('newUserEmail').value.trim();
+  const password = document.getElementById('newUserPassword').value.trim();
+  
+  if (!name || !email) {
+    showToast('Please fill all required fields.', 'error');
+    return;
+  }
+  
+  if (!email.endsWith('@depedqc.ph')) {
+    showToast('Email must be a valid DepEd QC email.', 'error');
+    return;
+  }
+  
+  const selectedGrades = Array.from(document.querySelectorAll('input[name="grades"]:checked'))
+    .map(cb => cb.value);
+  
+  if (selectedGrades.length === 0) {
+    showToast('Please select at least one grade level.', 'error');
+    return;
+  }
+  
+  const allowedUsers = getAllowedUsers();
+  
+  // Check if email already exists (excluding current user)
+  if (allowedUsers.some((user, i) => i !== index && user.email === email)) {
+    showToast('A user with this email already exists.', 'error');
+    return;
+  }
+  
+  // Update user
+  allowedUsers[index] = {
+    name,
+    email,
+    password: password ? simpleHash(password) : allowedUsers[index].password, // Keep existing password if not changed
+    grades: selectedGrades
+  };
+  
+  saveAllowedUsers(allowedUsers);
+  showToast('User updated successfully!', 'success');
+  cancelAddUser();
+  
+  // Reset save button to original functionality
+  const saveButton = document.querySelector('#addUserForm .btn-primary');
+  saveButton.textContent = 'Save User';
+  saveButton.onclick = addNewUser;
+  
+  renderUsersList();
+}
+
+function deleteUser(index) {
+  if (!confirm(`Are you sure you want to delete ${getAllowedUsers()[index].name}?`)) {
+    return;
+  }
+  
+  const allowedUsers = getAllowedUsers();
+  allowedUsers.splice(index, 1);
+  saveAllowedUsers(allowedUsers);
+  showToast('User deleted successfully!', 'success');
+  renderUsersList();
+}
+
+// ----- DASHBOARD BUTTONS -----
+function validateGoogleSheetLink(link) {
+  return link.includes('docs.google.com/spreadsheets');
+}
+
+function addButtonToDOM(name, link, category){
+  const grade = localStorage.getItem("currentGrade");
+  const isAdmin = grade === "Admin";
+
+  const classRecordSubjects = [
+    'filipino', 'english', 'mathematics', 'science', 'araling_panlipunan',
+    'epp', 'mapeh', 'music', 'arts', 'pe', 'health', 'grmc', 
+    'arabic_language', 'islamic_values', 'reading_literacy', 
+    'language', 'makabansa', 'esp'
+  ];
+  
+  // Determine if this is a class record subject
+  const isClassRecordSubject = classRecordSubjects.includes(category);
+
+  // For Admin users, use the category directly
+  // For non-admin users, use the grade level as the category
+  const storageKey = isClassRecordSubject 
+    ? `classRecordButtons_${grade}_${category}`
+    : (isAdmin ? `dashboardButtons_Admin_${category}` : `dashboardButtons_${grade}_${category}`);
+  
+  let buttons = JSON.parse(localStorage.getItem(storageKey)) || [];
+  
+  // Check if button with same name already exists in this category
+  if (buttons.some(b => b.name === name && b.category === category)) {
+    showToast('A button with this name already exists in this category.', 'error');
+    return false;
+  }
+  
+  buttons.push({name, link, category});
+  localStorage.setItem(storageKey, JSON.stringify(buttons));
+
+  // Only add to DOM if it's the current category
+  if (category === currentCategory) {
+    const dashboardArea = document.getElementById("dashboardArea");
+    const div = document.createElement('div');
+    div.className = 'db-button';
+    div.innerHTML = `${name} <button class="delete-btn" onclick="deleteButton(this,'${name}','${link}','${category}')">x</button>`;
+    div.onclick = e => { if(e.target.tagName !== 'BUTTON') window.open(link,'_blank'); };
+    dashboardArea.appendChild(div);
+  }
+  
+  return true;
+}
+
+function loadDashboardButtons(category = null){
+  const grade = localStorage.getItem("currentGrade");
+  const isAdmin = grade === "Admin";
+  
+  // Define class record subjects
+  const classRecordSubjects = [
+    'filipino', 'english', 'mathematics', 'science', 'araling_panlipunan',
+    'epp', 'mapeh', 'music', 'arts', 'pe', 'health', 'grmc', 
+    'arabic_language', 'islamic_values', 'reading_literacy', 
+    'language', 'makabansa', 'esp'
+  ];
+  
+  // Determine if this is a class record subject
+  const isClassRecordSubject = classRecordSubjects.includes(category);
+  
+  // For class record subjects, use a different storage format
+  const storageKey = isClassRecordSubject 
+    ? `classRecordButtons_${grade}_${category}`
+    : (isAdmin ? `dashboardButtons_Admin_${category}` : `dashboardButtons_${grade}_${category}`);
+  
+  const buttons = JSON.parse(localStorage.getItem(storageKey)) || [];
+  const dashboardArea = document.getElementById("dashboardArea");
+  dashboardArea.innerHTML = '';
+  
+  // Update category badge
+  const categoryBadge = document.getElementById('categoryBadge');
+  if (category) {
+    // Format the category name for display
+    let displayName = category;
+    if (category === 'araling_panlipunan') displayName = 'Araling Panlipunan';
+    else if (category === 'arabic_language') displayName = 'Arabic Language';
+    else if (category === 'islamic_values') displayName = 'Islamic Values';
+    else if (category === 'reading_literacy') displayName = 'Reading & Literacy';
+    else displayName = category.charAt(0).toUpperCase() + category.slice(1);
+    
+    categoryBadge.textContent = displayName;
+    categoryBadge.style.display = 'inline-block';
+  } else {
+    categoryBadge.style.display = 'none';
+  }
+  
+  // Show info if no buttons found
+  if (buttons.length === 0) {
+    dashboardArea.innerHTML = '<div class="empty-state">No buttons found for this category. Add some using the form above.</div>';
+    return;
+  }
+  
+  buttons.forEach(b => {
+    const div = document.createElement('div');
+    div.className = 'db-button';
+    div.innerHTML = `${b.name} <button class="delete-btn" onclick="deleteButton(this,'${b.name}','${b.link}','${b.category}')">x</button>`;
+    div.onclick = e => { if(e.target.tagName !== 'BUTTON') window.open(b.link,'_blank'); };
+    dashboardArea.appendChild(div);
+  });
+}
+
+function addNewDashboardButton(){
+  const name = document.getElementById('newButtonName').value.trim();
+  const link = document.getElementById('newButtonLink').value.trim();
+  const category = document.getElementById('buttonCategory').value;
+  
+  if(!name){ 
+    showToast("Please enter a button name.", "error"); 
+    return; 
+  }
+  
+  if(!link){ 
+    showToast("Please enter a link.", "error"); 
+  return; 
+  }
+  
+  if (!validateGoogleSheetLink(link)) {
+    if (!confirm("This doesn't appear to be a Google Sheets link. Do you want to continue anyway?")) {
+      return;
+    }
+  }
+  
+  if (addButtonToDOM(name, link, category)) {
+    document.getElementById('newButtonName').value='';
+    document.getElementById('newButtonLink').value='';
+    showToast('Button added successfully!', 'success');
+    
+    // If we're currently viewing this category, refresh the view
+    if (category === currentCategory) {
+      loadDashboardButtons(currentCategory);
+    }
+  }
+}
+
+function deleteButton(btnDiv, name, link, category){
+  if (!confirm(`Are you sure you want to delete the "${name}" button?`)) {
+    return;
+  }
+  
+  const div = btnDiv.parentElement;
+  div.style.opacity = '0';
+  div.style.transform = 'scale(0.8)';
+  div.style.transition = 'all 0.3s';
+  
+  setTimeout(() => {
+    div.remove();
+    lastDeleted = {name, link, category};
+    showUndo();
+    
+    const grade = localStorage.getItem("currentGrade");
+    const isAdmin = grade === "Admin";
+    const classRecordSubjects = [
+      'filipino', 'english', 'mathematics', 'science', 'araling_panlipunan',
+      'epp', 'mapeh', 'music', 'arts', 'pe', 'health', 'grmc', 
+      'arabic_language', 'islamic_values', 'reading_literacy', 
+      'language', 'makabansa', 'esp'
+    ];
+    
+    // Determine if this is a class record subject
+    const isClassRecordSubject = classRecordSubjects.includes(category);
+    
+    // For class record subjects, use a different storage format
+    const storageKey = isClassRecordSubject 
+      ? `classRecordButtons_${grade}_${category}`
+      : (isAdmin ? `dashboardButtons_Admin_${category}` : `dashboardButtons_${grade}_${category}`);
+    
+    let buttons = JSON.parse(localStorage.getItem(storageKey)) || [];
+    buttons = buttons.filter(b => !(b.name===name && b.link===link && b.category===category));
+    localStorage.setItem(storageKey, JSON.stringify(buttons));
+  }, 300);
+}
+
+function showUndo(){
+  const undoArea = document.getElementById("undoArea");
+  undoArea.innerHTML = `<div class="undo-box">Button deleted. <button onclick="undoDelete()">Undo</button></div>`;
+  
+  // Auto-hide after 5 seconds
+  setTimeout(() => {
+    if (lastDeleted) {
+      undoArea.innerHTML = '';
+      lastDeleted = null;
+    }
+  }, 5000);
+}
+
+function undoDelete(){
+  if(lastDeleted){
+    addButtonToDOM(lastDeleted.name, lastDeleted.link, lastDeleted.category);
+    lastDeleted=null;
+    document.getElementById("undoArea").innerHTML='';
+    showToast('Button restored!', 'success');
+  }
+}
+
+function openMenu(section){
+  // Remove active class from all buttons
+  document.querySelectorAll('.sidebar button').forEach(btn => {
+    btn.classList.remove('active');
+  });
+  
+  // Add active class to clicked button
+  event.target.classList.add('active');
+  
+  document.getElementById('sectionTitle').textContent = section;
+  
+  // Map menu items to categories for Admin users
+  const adminCategoryMap = {
+    'teachersProfile': 'teachers',
+    'forms': 'forms',
+    'enrollment': 'enrollment',
+    'serviceRecord': 'records',
+    'reports': 'reports',
+    'utilities': 'utilities',
+    'orgChart': 'chart'
+  };
+  
+  const grade = localStorage.getItem("currentGrade");
+  const isAdmin = grade === "Admin";
+  
+  if (isAdmin) {
+    // For Admin users, use the mapped category
+    currentCategory = adminCategoryMap[section] || section.toLowerCase().replace(/\s+/g, '');
+  } else {
+    // For non-admin users, use the standard mapping
+    const categoryMap = {
+      'pupils': 'pupils',
+      'enrollment': 'enrollment',
+      'teachers': 'teachers',
+      'records': 'records',
+      'forms': 'forms',
+      'Organizational Chart': 'chart',
+      'resources': 'resources',
+
+    // Class record subjects
+      'Filipino': 'filipino',
+      'English': 'english',
+      'Mathematics': 'mathematics',
+      'Science': 'science',
+      'Araling Panlipunan': 'araling_panlipunan',
+      'EPP': 'epp',
+      'Music': 'music',
+      'Arts': 'arts',
+      'PE': 'pe',
+      'Health': 'health',
+      'GMRC': 'grmc',
+      'Arabic Language': 'arabic_language',
+      'Islamic Values Education': 'islamic_values',
+      'Reading and Literacy': 'reading_literacy',
+      'Language': 'language',
+      'Makabansa': 'makabansa',
+      'ESP': 'esp'
+    };
+    
+    currentCategory = categoryMap[section] || section.toLowerCase().replace(/\s+/g, '');
+  }
+  
+  // Load buttons for this category
+  loadDashboardButtons(currentCategory);
+  
+  // Close sidebar on mobile after selection
+  if (window.innerWidth <= 768) {
+    document.getElementById('sidebar').classList.remove('visible');
+  }
+}
+
+// ----- INITIALIZE -----
+window.onload = function(){
+  const gradeLevel = localStorage.getItem("currentGrade");
+  const username = localStorage.getItem("username");
+  
+  if(username && gradeLevel){
+    document.getElementById("loginArea").style.display="none";
+    document.getElementById("dashboardContainer").style.display="flex";
+    document.getElementById("welcomeUser").textContent = `${username}, ${gradeLevel.toUpperCase()} Dashboard`;
+    
+    if(username.toLowerCase() === "manuel cayao" && gradeLevel === "Admin") {
+      loadAdminMenu();
+      // Set default category for Admin
+      currentCategory = 'teachers';
+      loadDashboardButtons(currentCategory);
+    } else {
+      loadTeacherMenu(gradeLevel);
+      // Set default category for Teachers
+      currentCategory = 'pupils';
+      loadDashboardButtons(currentCategory);
+    }
+  }
+};
+</script>
+</body>
+</html>

@@ -1,0 +1,1014 @@
+<!<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PCCAES School Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --secondary: #10b981;
+            --danger: #ef4444;
+            --light: #f9fafb;
+            --dark: #111827;
+            --gray-light: #f3f4f6;
+            --gray-dark: #6b7280;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--light);
+            color: var(--dark);
+            display: flex;
+            flex-direction: row;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 220px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 1rem;
+            flex-shrink: 0;
+            border-top-right-radius: 10px;
+            border-bottom-right-radius: 10px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar h2 {
+            margin: 0 0 1rem 0;
+            text-align: center;
+        }
+
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        .sidebar a:hover {
+            background: var(--secondary);
+            transform: translateX(5px);
+        }
+        .sidebar a.active {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .content {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        h1 {
+            color: var(--primary);
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        h2 {
+            color: var(--dark);
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            border: 1px solid #e5e7eb;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            margin-top: 1rem;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        th,
+        td {
+            padding: 1rem;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+
+        th {
+            background: var(--gray-light);
+            font-weight: bold;
+            color: var(--gray-dark);
+            text-transform: uppercase;
+        }
+
+        tr:nth-child(even) {
+            background: #f9f9f9;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+
+        input,
+        select {
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            margin: 5px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4338ca;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--gray-dark);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+            transform: translateY(-2px);
+        }
+
+        footer {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: #555;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .login-box {
+            max-width: 450px;
+            margin: 4rem auto;
+            background: white;
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            border: 1px solid #e5e7eb;
+        }
+
+        .login-box h2 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+        
+        .login-box .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .login-box input {
+            width: calc(100% - 1.5rem);
+            padding: 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        
+        .login-btn {
+            width: 100%;
+            padding: 0.9rem;
+            font-size: 1.1rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.2s;
+        }
+        
+        .login-btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        #loginMessage, #adminLoginMessage {
+            text-align: center;
+            color: var(--danger);
+            margin-top: 1rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        
+        .logout-btn {
+            float: right;
+            padding: 0.6rem 1.2rem;
+            margin-bottom: 1rem;
+            border: none;
+            border-radius: 8px;
+            background: var(--gray-dark);
+            color: white;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .logout-btn:hover {
+            background: #4b5563;
+        }
+
+        #memberSpecify {
+            display: none;
+        }
+        
+        .parent-result {
+            display: none;
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-top: 1.5rem;
+        }
+        
+        .parent-result .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            font-size: 0.9rem;
+        }
+
+        .parent-result h3 {
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .parent-result .data-grid div {
+            padding: 10px;
+            border-radius: 8px;
+            background: var(--gray-light);
+            word-wrap: break-word;
+        }
+        .parent-result .data-grid strong {
+            color: var(--dark);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                border-radius: 0;
+                padding: 1rem 0;
+                flex-direction: row;
+                justify-content: space-around;
+                align-items: center;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+
+            .sidebar h2 {
+                display: none;
+            }
+
+            .sidebar a {
+                padding: 0.75rem;
+                justify-content: center;
+            }
+
+            .content {
+                padding: 1rem;
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .parent-result .data-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>PCCAES</h2>
+        <a href="#dashboard" class="active" onclick="showPage('dashboard')">Dashboard</a>
+        <a href="#enrollment" onclick="showPage('enrollment')">Enrollment</a>
+        <a href="#admin" onclick="showPage('admin')">Admin</a>
+    </div>
+
+    <div class="content">
+
+        <!-- Dashboard -->
+        <div id="dashboard" class="page active">
+            <h1>PCCAES Enrollment Dashboard</h1>
+            <div class="cards" id="summaryCards"></div>
+            <h2>Search by LRN (for Parents)</h2>
+            <div style="display:flex; gap:10px; flex-wrap: wrap;">
+                <input type="text" id="parentLRN" placeholder="Enter 12-digit LRN" pattern="\d{12}" class="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 flex-1 min-w-[200px]">
+                <button class="btn-primary" onclick="searchLRN()">Search</button>
+                <button class="btn-secondary" onclick="document.getElementById('parentLRN').value=''; document.getElementById('parentSearchResult').style.display='none';">Refresh</button>
+            </div>
+            <div id="parentSearchResult" class="parent-result">
+                <h3>Student Info</h3>
+                <div id="parentStudentData" class="data-grid"></div>
+                <div class="button-group">
+                    <button class="btn-secondary" onclick="printParentData()">Print</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Enrollment -->
+        <div id="enrollment" class="page">
+            <h1>Enrollment Page</h1>
+            <div class="login-box" id="teacherLoginBox">
+                <h2>👨‍🏫 Teacher Login</h2>
+                <form id="teacherLoginForm">
+                    <div class="form-group"><label for="teacherEmail">Email</label><input type="email" id="teacherEmail" required></div>
+                    <div class="form-group"><label for="teacherPassword">Password</label><input type="password" id="teacherPassword" required></div>
+                    <button type="submit" class="login-btn">Login</button>
+                </form>
+                <p id="loginMessage"></p>
+            </div>
+            
+            <div id="enrollmentSection" style="display:none;">
+                <button class="logout-btn" onclick="teacherLogout()">Logout</button>
+                <h2>Welcome, <span id="teacherWelcome"></span></h2>
+                <div class="button-group">
+                    <button type="button" class="btn-secondary" onclick="addCustomField()">➕ Add Field</button>
+                    <button type="button" class="btn-danger" onclick="removeCustomField()">➖ Remove Field</button>
+                </div>
+            
+                <h2>Enrollment Entry Form</h2>
+                <form id="enrollmentForm">
+                    <div class="form-grid" id="enrollmentFields">
+                        <!-- Default Fields -->
+                        <div class="form-group"><label>LRN</label><input type="text" id="lrn" maxlength="12" pattern="\d{12}" placeholder="12-digit LRN" required></div>
+                        <div class="form-group"><label>Surname</label><input type="text" id="surname" required></div>
+                        <div class="form-group"><label>First Name</label><input type="text" id="firstname" required></div>
+                        <div class="form-group"><label>Middle Name</label><input type="text" id="middlename"></div>
+                        <div class="form-group"><label>Suffix</label><input type="text" id="suffix"></div>
+                        <div class="form-group"><label>Gender</label>
+                            <select id="gender" required>
+                                <option value="">Select</option>
+                                <option>Male</option><option>Female</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Birthday</label><input type="date" id="birthday"></div>
+                        <div class="form-group"><label>Grade Level</label>
+                            <select id="gradeLevel" required>
+                                <option value="">Select</option>
+                                <option>SPET</option><option>Kinder</option>
+                                <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
+                                <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
+                            </select>
+                        </div>
+                        <div class="form-group"><label>Section</label><input type="text" id="section"></div>
+                        <div class="form-group"><label>Teacher/Adviser</label><input type="text" id="adviser"></div>
+                        <div class="form-group"><label>Address</label><input type="text" id="address"></div>
+                        <div class="form-group"><label>Contact Number</label><input type="text" id="contact"></div>
+                        <div class="form-group"><label>Mother's Name</label><input type="text" id="mother"></div>
+                        <div class="form-group"><label>Father's Name</label><input type="text" id="father"></div>
+                        <div class="form-group"><label>Guardian</label><input type="text" id="guardian"></div>
+                        <div class="form-group">
+                            <label>Member</label>
+                            <select id="member">
+                                <option value="None">None</option>
+                                <option value="4Ps">4Ps</option>
+                                <option value="Lingap">Lingap</option>
+                                <option value="Others">Others</option>
+                            </select>
+                        </div>
+                        <div class="form-group" id="memberSpecify">
+                            <label>Please Specify</label>
+                            <input type="text" id="memberOther">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary">Add/Update Student</button>
+                    <button type="button" class="btn-secondary" onclick="resetForm()">Refresh</button>
+                </form>
+            
+                <h2>Student List</h2>
+                <div style="margin-bottom:10px;">
+                    <label>Filter Grade: <select id="filterGrade" onchange="loadStudents()"><option value="">All</option></select></label>
+                    <label>Filter Section: <input type="text" id="filterSection" placeholder="Section" oninput="loadStudents()"></label>
+                    <button class="btn-secondary" onclick="exportExcel()">Export to Excel</button>
+                </div>
+                <table id="studentsTable">
+                    <thead><tr><th>LRN</th><th>Name</th><th>Gender</th><th>Grade</th><th>Section</th><th>Teacher/Adviser</th><th>Actions</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Admin -->
+        <div id="admin" class="page">
+            <h1>Admin Page</h1>
+            <div class="login-box" id="adminLoginBox">
+                <h2>Admin Login</h2>
+                <form id="adminLoginForm">
+                    <div class="form-group"><label for="adminEmail">Email</label><input type="email" id="adminEmail" required></div>
+                    <div class="form-group"><label for="adminPassword">Password</label><input type="password" id="adminPassword" required></div>
+                    <button type="submit" class="login-btn">Login</button>
+                </form>
+                <p id="adminLoginMessage"></p>
+            </div>
+            <div id="adminSection" style="display:none;">
+                <button class="logout-btn" onclick="adminLogout()">Logout</button>
+                <h2>Assign Teacher Account</h2>
+                <form id="teacherAssignForm">
+                    <div class="form-grid">
+                        <div class="form-group"><label for="assignEmail">Email</label><input type="email" id="assignEmail" placeholder="example@depedqc.ph" required></div>
+                        <div class="form-group"><label for="assignPassword">Password</label><input type="password" id="assignPassword" required></div>
+                    </div>
+                    <button type="submit" class="btn-primary">Assign Teacher</button>
+                </form>
+                <h3>Registered Teachers</h3>
+                <table>
+                    <thead><tr><th>Email</th><th>Action</th></tr></thead>
+                    <tbody id="teacherList"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <footer>&copy; 2025 PCCAES School Dashboard</footer>
+    </div>
+
+    <script>
+        // --- Global variables ---
+        let db;
+        let editingLRN = null;
+
+        // --- IndexedDB Initialization ---
+        function initDB(callback) {
+            const request = indexedDB.open("PCCAES_DB", 10);
+
+            request.onupgradeneeded = e => {
+                db = e.target.result;
+                if (!db.objectStoreNames.contains("students")) db.createObjectStore("students", { keyPath: "lrn" });
+                if (!db.objectStoreNames.contains("teachers")) db.createObjectStore("teachers", { keyPath: "email" });
+                if (!db.objectStoreNames.contains("admin")) db.createObjectStore("admin", { keyPath: "email" });
+            };
+
+            request.onsuccess = e => {
+                db = e.target.result;
+                // Add default admin if it doesn't exist
+                const tx = db.transaction("admin", "readwrite");
+                const store = tx.objectStore("admin");
+                store.get("manuel.cayao@depedqc.ph").onsuccess = ev => {
+                    if (!ev.target.result) {
+                        store.put({ email: "manuel.cayao@depedqc.ph", password: "pass123" });
+                    }
+                };
+                tx.oncomplete = () => {
+                    console.log("IndexedDB initialized and default admin ensured.");
+                    if (callback) callback();
+                };
+            };
+
+            request.onerror = e => {
+                console.error("IndexedDB failed to open:", e.target.errorCode);
+                alert("IndexedDB failed to open: " + e.target.errorCode);
+            };
+        }
+        
+        // --- Navigation & Page Management ---
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
+            document.querySelector(`.sidebar a[href="#${pageId}"]`).classList.add('active');
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+            initDB(() => {
+                const initialHash = window.location.hash.substring(1) || 'dashboard';
+                showPage(initialHash);
+                bindLoginEvents();
+                loadStudents();
+                loadTeachers();
+                loadCustomFields();
+                updateCards();
+            });
+        });
+        window.addEventListener("hashchange", () => {
+             const newHash = window.location.hash.substring(1) || 'dashboard';
+             showPage(newHash);
+        });
+
+        // --- Login / Logout ---
+        function bindLoginEvents() {
+            // Teacher Login
+            document.getElementById("teacherLoginForm").onsubmit = async e => {
+                e.preventDefault();
+                const email = document.getElementById("teacherEmail").value.trim();
+                const pass = document.getElementById("teacherPassword").value.trim();
+                const loginMessage = document.getElementById("loginMessage");
+
+                const tx = db.transaction("teachers", "readonly");
+                const store = tx.objectStore("teachers");
+                const request = store.get(email);
+
+                request.onsuccess = ev => {
+                    const teacher = ev.target.result;
+                    if (teacher && teacher.password === pass) {
+                        sessionStorage.setItem("teacher", email);
+                        document.getElementById("teacherLoginBox").style.display = "none";
+                        document.getElementById("enrollmentSection").style.display = "block";
+                        document.getElementById("teacherWelcome").textContent = email;
+                        loginMessage.textContent = "";
+                    } else {
+                        loginMessage.textContent = "Invalid credentials. Please try again.";
+                    }
+                };
+                request.onerror = () => {
+                    loginMessage.textContent = "An error occurred. Please try again.";
+                };
+            };
+        
+            // Admin Login
+            document.getElementById("adminLoginForm").onsubmit = async e => {
+                e.preventDefault();
+                const email = document.getElementById("adminEmail").value.trim();
+                const pass = document.getElementById("adminPassword").value.trim();
+                const loginMessage = document.getElementById("adminLoginMessage");
+
+                const tx = db.transaction("admin", "readonly");
+                const store = tx.objectStore("admin");
+                const request = store.get(email);
+
+                request.onsuccess = ev => {
+                    const admin = ev.target.result;
+                    if (admin && admin.password === pass) {
+                        sessionStorage.setItem("admin", email);
+                        document.getElementById("adminLoginBox").style.display = "none";
+                        document.getElementById("adminSection").style.display = "block";
+                        loginMessage.textContent = "";
+                        loadTeachers();
+                    } else {
+                        loginMessage.textContent = "Invalid Admin credentials. Please try again.";
+                    }
+                };
+                request.onerror = () => {
+                    loginMessage.textContent = "An error occurred. Please try again.";
+                };
+            };
+        
+            // Check session on page load
+            const teacherEmail = sessionStorage.getItem("teacher");
+            if (teacherEmail) {
+                document.getElementById("teacherLoginBox").style.display = "none";
+                document.getElementById("enrollmentSection").style.display = "block";
+                document.getElementById("teacherWelcome").textContent = teacherEmail;
+            }
+            const adminEmail = sessionStorage.getItem("admin");
+            if (adminEmail) {
+                document.getElementById("adminLoginBox").style.display = "none";
+                document.getElementById("adminSection").style.display = "block";
+            }
+        }
+        
+        function teacherLogout() {
+            sessionStorage.removeItem("teacher");
+            document.getElementById("teacherLoginBox").style.display = "block";
+            document.getElementById("enrollmentSection").style.display = "none";
+            document.getElementById("teacherWelcome").textContent = "";
+        }
+        
+        function adminLogout() {
+            sessionStorage.removeItem("admin");
+            document.getElementById("adminLoginBox").style.display = "block";
+            document.getElementById("adminSection").style.display = "none";
+        }
+
+        // --- Assign Teacher ---
+        document.getElementById("teacherAssignForm").onsubmit = e => {
+            e.preventDefault();
+            const email = document.getElementById("assignEmail").value.trim();
+            const pass = document.getElementById("assignPassword").value.trim();
+            if (!email || !pass) { alert("Email and password required."); return; }
+            const tx = db.transaction("teachers", "readwrite");
+            const store = tx.objectStore("teachers");
+            store.put({ email: email, password: pass });
+            tx.oncomplete = () => { 
+                alert("Teacher assigned successfully."); 
+                loadTeachers(); 
+                document.getElementById("teacherAssignForm").reset(); 
+            };
+            tx.onerror = () => { alert("Error assigning teacher. Possibly email already exists."); };
+        };
+        
+        function loadTeachers() {
+            if (!db) return;
+            const tx = db.transaction("teachers", "readonly");
+            const store = tx.objectStore("teachers");
+            const request = store.getAll();
+            request.onsuccess = e => {
+                const tbody = document.getElementById("teacherList");
+                tbody.innerHTML = "";
+                e.target.result.forEach(t => {
+                    const tr = document.createElement("tr");
+                    tr.innerHTML = `<td>${t.email}</td><td><button class="btn-danger" onclick="deleteTeacher('${t.email}')">Delete</button></td>`;
+                    tbody.appendChild(tr);
+                });
+            };
+        }
+        
+        function deleteTeacher(email) {
+            if (!confirm("Are you sure you want to delete this teacher?")) return;
+            const tx = db.transaction("teachers", "readwrite");
+            const store = tx.objectStore("teachers");
+            store.delete(email).onsuccess = () => loadTeachers();
+        }
+        
+        // --- Member Specify (on enrollment form) ---
+        const memberSelect = document.getElementById("member");
+        const memberSpecify = document.getElementById("memberSpecify");
+        memberSelect.addEventListener("change", () => {
+            memberSpecify.style.display = memberSelect.value === "Others" ? "block" : "none";
+        });
+        
+        // --- Enrollment Form & Custom Fields ---
+        document.getElementById("enrollmentForm").onsubmit = e => {
+            e.preventDefault();
+            const lrn = document.getElementById("lrn").value.trim();
+            if (!lrn || lrn.length !== 12) {
+                alert("LRN must be a 12-digit number.");
+                return;
+            }
+            const student = {
+                lrn: lrn,
+                surname: document.getElementById("surname").value.trim(),
+                firstname: document.getElementById("firstname").value.trim(),
+                middlename: document.getElementById("middlename").value.trim(),
+                suffix: document.getElementById("suffix").value.trim(),
+                gender: document.getElementById("gender").value,
+                birthday: document.getElementById("birthday").value,
+                gradeLevel: document.getElementById("gradeLevel").value,
+                section: document.getElementById("section").value.trim(),
+                adviser: document.getElementById("adviser").value.trim(),
+                address: document.getElementById("address").value.trim(),
+                contact: document.getElementById("contact").value.trim(),
+                mother: document.getElementById("mother").value.trim(),
+                father: document.getElementById("father").value.trim(),
+                guardian: document.getElementById("guardian").value.trim(),
+                member: document.getElementById("member").value,
+                memberOther: document.getElementById("memberOther").value.trim(),
+                dateEnrolled: new Date().toISOString().split('T')[0],
+                customFields: {}
+            };
+            document.querySelectorAll("#enrollmentFields .custom-field input").forEach(f => {
+                const label = f.getAttribute("data-label") || f.placeholder;
+                student.customFields[label] = f.value;
+            });
+
+            const tx = db.transaction("students", "readwrite");
+            tx.objectStore("students").put(student);
+            tx.oncomplete = () => {
+                alert("Student added/updated successfully.");
+                resetForm();
+                loadStudents();
+                updateCards();
+            };
+            tx.onerror = () => {
+                alert("An error occurred while saving the student.");
+            };
+        };
+
+        function resetForm() {
+            editingLRN = null;
+            document.getElementById("enrollmentForm").reset();
+            document.getElementById("memberSpecify").style.display = "none";
+        }
+        
+        // --- Load Students ---
+        function loadStudents() {
+            const tbody = document.querySelector("#studentsTable tbody");
+            tbody.innerHTML = "";
+            const gradeFilter = document.getElementById("filterGrade").value;
+            const sectionFilter = document.getElementById("filterSection").value.toLowerCase();
+            
+            const tx = db.transaction("students", "readonly");
+            const store = tx.objectStore("students");
+            const request = store.getAll();
+        
+            request.onsuccess = e => {
+                const students = e.target.result;
+                const gradesSet = new Set();
+                students.forEach(s => gradesSet.add(s.gradeLevel));
+                const gradeSelect = document.getElementById("filterGrade");
+                const currentGrade = gradeSelect.value;
+                gradeSelect.innerHTML = '<option value="">All</option>';
+                gradesSet.forEach(g => {
+                    const opt = document.createElement("option");
+                    opt.value = g;
+                    opt.textContent = g;
+                    if (g === currentGrade) opt.selected = true;
+                    gradeSelect.appendChild(opt);
+                });
+        
+                students
+                    .filter(s => (!gradeFilter || s.gradeLevel === gradeFilter) && (!sectionFilter || s.section.toLowerCase().includes(sectionFilter)))
+                    .forEach(s => {
+                        const tr = document.createElement("tr");
+                        tr.innerHTML = `<td>${s.lrn}</td><td>${s.surname}, ${s.firstname} ${s.middlename} ${s.suffix}</td><td>${s.gender}</td><td>${s.gradeLevel}</td><td>${s.section}</td><td>${s.adviser}</td><td>${s.dateEnrolled || "N/A"}</td>
+                                        <td>
+                                            <button class="btn-primary" onclick="editStudent('${s.lrn}')">Edit</button>
+                                            <button class="btn-danger" onclick="deleteStudent('${s.lrn}')">Delete</button>
+                                        </td>`;
+                        tbody.appendChild(tr);
+                    });
+            };
+        }
+        
+        function editStudent(lrn) {
+            const tx = db.transaction("students", "readonly");
+            const store = tx.objectStore("students");
+            const request = store.get(lrn);
+            request.onsuccess = e => {
+                const s = e.target.result;
+                if (!s) { alert("Student not found."); return; }
+                
+                editingLRN = s.lrn;
+                document.getElementById("lrn").value = s.lrn;
+                document.getElementById("surname").value = s.surname;
+                document.getElementById("firstname").value = s.firstname;
+                document.getElementById("middlename").value = s.middlename;
+                document.getElementById("suffix").value = s.suffix;
+                document.getElementById("gender").value = s.gender;
+                document.getElementById("birthday").value = s.birthday;
+                document.getElementById("gradeLevel").value = s.gradeLevel;
+                document.getElementById("section").value = s.section;
+                document.getElementById("adviser").value = s.adviser;
+                document.getElementById("address").value = s.address;
+                document.getElementById("contact").value = s.contact;
+                document.getElementById("mother").value = s.mother;
+                document.getElementById("father").value = s.father;
+                document.getElementById("guardian").value = s.guardian;
+                document.getElementById("member").value = s.member;
+                document.getElementById("memberSpecify").style.display = s.member === "Others" ? "block" : "none";
+                document.getElementById("memberOther").value = s.memberOther;
+        
+                // Clear existing custom fields
+                document.querySelectorAll("#enrollmentFields .custom-field").forEach(f => f.remove());
+                
+                // Add custom fields from student data
+                for (const key in s.customFields) {
+                    const div = document.createElement("div");
+                    div.className = "form-group custom-field";
+                    div.innerHTML = `<label contenteditable="true" class="custom-label">${key}</label><input type="text" placeholder="${key}" value="${s.customFields[key] || ''}" data-label="${key}">`;
+                    document.getElementById("enrollmentFields").appendChild(div);
+                    addLabelEditHandler(div.querySelector("label"), div.querySelector("input"));
+                }
+            };
+        }
+        
+        function deleteStudent(lrn) {
+            if (!confirm("Are you sure you want to delete this student record?")) return;
+            const tx = db.transaction("students", "readwrite");
+            const store = tx.objectStore("students");
+            store.delete(lrn).oncomplete = () => {
+                loadStudents();
+                updateCards();
+                alert("Student record deleted.");
+            };
+        }
+        
+        // --- Cards ---
+        function updateCards() {
+            if (!db) return;
+            const container = document.getElementById("summaryCards");
+            container.innerHTML = "";
+            const tx = db.transaction("students", "readonly");
+            const store = tx.objectStore("students");
+            const request = store.getAll();
+
+            request.onsuccess = e => {
+                const students = e.target.result;
+                const grades = ["SPET", "Kinder", "Grade 1", "Grade 2", "Grade 3", "Grade 4", "Grade 5", "Grade 6"];
+                grades.forEach(g => {
+                    const countM = students.filter(s => s.gradeLevel === g && s.gender === "Male").length;
+                    const countF = students.filter(s => s.gradeLevel === g && s.gender === "Female").length;
+                    const total = countM + countF;
+                    const card = document.createElement("div");
+                    card.className = "card";
+                    card.innerHTML = `<h3>${g}</h3><p>Total: ${total}</p><p>Male: ${countM}</p><p>Female: ${countF}</p>`;
+                    container.appendChild(card);
+                });
+            };
+        }
+        
+        // --- Parent Search ---
+        function searchLRN() {
+            const lrn = document.getElementById("parentLRN").value.trim();
+            if (!lrn || lrn.length !== 12) {
+                alert("Please enter a valid 12-digit LRN.");
+                return;
+            }
+            const tx = db.transaction("students", "readonly");
+            const store = tx.objectStore("students");
+            const request = store.get(lrn);
+
+            request.onsuccess = e => {
+                const student = e.target.result;
+                const resultDiv = document.getElementById("parentSearchResult");
+                const grid = document.getElementById("parentStudentData");
+                grid.innerHTML = "";
+                if (student) {
+                    for (const key in student) {
+                        const d = document.createElement("div");
+                        d.innerHTML = `<strong>${key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}:</strong> ${JSON.stringify(student[key]).replace(/"/g, '')}`;
+                        grid.appendChild(d);
+                    }
+                    resultDiv.style.display = "block";
+                } else {
+                    alert("No student found with that LRN.");
+                    resultDiv.style.display = "none";
+                }
+            };
+        }
+        
+        function printParentData() {
+            const content = document.getElementById("parentSearchResult").innerHTML;
+            const w = window.open();
+            w.document.write(`<html><head><title>Student Info</title></head><body>${content}</body></html>`);
+            w.print();
+            w.close();
+        }
+        
+        // --- Excel Export ---
+        function exportExcel() {
+            const tx = db.transaction("students", "readonly");
+            const store = tx.objectStore("students");
+            const request = store.getAll();
+
+            request.onsuccess = e => {
+                const students = e.target.result.map(s => {
+                    // Flatten the object for Excel export
+                    const flattened = { ...s };
+                    if (s.customFields) {
+                        for (const key in s.customFields) {
+                            flattened[key] = s.customFields[key];
+                        }
+                    }
+                    delete flattened.customFields;
+                    return flattened;
+                });
+        
+                if (!students.length) {
+                    alert("No student data to export.");
+                    return;
+                }
+        
+                const ws = XLSX.utils.json_to_sheet(students);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Students");
+                XLSX.writeFile(wb, "PCCAES_Students.xlsx");
+            };
+        }
+        
+        // --- Custom Fields ---
+        function addCustomField() {
+            const div = document.createElement("div");
+            div.className = "form-group custom-field";
+            div.innerHTML = `<label contenteditable="true" class="custom-label">New Field</label><input type="text" placeholder="New Field">`;
+            document.getElementById("enrollmentFields").appendChild(div);
+            addLabelEditHandler(div.querySelector("label"), div.querySelector("input"));
+            saveCustomFields();
+        }
+        
+        function removeCustomField() {
+            const fields = document.querySelectorAll("#enrollmentFields .custom-field");
+            if (fields.length > 0) {
+                fields[fields.length - 1].remove();
+                saveCustomFields();
+            }
+        }
+        
+        function saveCustomFields() {
+            const fields = document.querySelectorAll("#enrollmentFields .custom-field");
+            const data = [];
+            fields.forEach(f => {
+                const label = f.querySelector("label").textContent.trim();
+                const placeholder = f.querySelector("input").placeholder;
+                data.push(label || placeholder);
+            });
+            localStorage.setItem("customFields", JSON.stringify(data));
+        }
+        
+        function loadCustomFields() {
+            const saved = JSON.parse(localStorage.getItem("customFields") || "[]");
+            saved.forEach(ph => {
+                const div = document.createElement("div");
+                div.className = "form-group custom-field";
+                div.innerHTML = `<label contenteditable="true" class="custom-label">${ph}</label><input type="text" placeholder="${ph}">`;
+                document.getElementById("enrollmentFields").appendChild(div);
+                addLabelEditHandler(div.querySelector("label"), div.querySelector("input"));
+            });
+        }
+        
+        function addLabelEditHandler(label, input) {
+            label.addEventListener("input", () => {
+                input.setAttribute("data-label", label.textContent);
+                saveCustomFields();
+            });
+        }
+
+    </script>
+</body>
+</html>

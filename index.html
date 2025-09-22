@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Website</title>
+  <style>
+    * {margin: 0; padding: 0; box-sizing: border-box;}
+    body {font-family: Arial, sans-serif; background: #f9f9f9; color: #333; line-height: 1.6;}
+    header {
+      background: #333; color: #fff; padding: 1rem 2rem;
+      position: sticky; top: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: center;
+    }
+    header h1 {margin: 0; font-size: 1.8rem;}
+    nav a {
+      color: #fff; text-decoration: none; margin: 0 12px; font-weight: bold; transition: color 0.3s ease;
+    }
+    nav a:hover, nav a.active {color: #ffcc00;}
+    .hero {
+      background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+                  url("https://picsum.photos/1600/600") center/cover no-repeat;
+      color: white; height: 65vh;
+      display: flex; flex-direction: column; justify-content: center; align-items: center;
+      text-align: center; padding: 0 1rem;
+    }
+    .hero h2 {font-size: 3rem; margin-bottom: 1rem;}
+    .hero p {font-size: 1.2rem; max-width: 700px; margin-bottom: 1.5rem;}
+    .hero a {
+      display: inline-block; padding: 0.8rem 1.6rem;
+      background: #ffcc00; color: #333; text-decoration: none; font-weight: bold;
+      border-radius: 5px; transition: background 0.3s ease;
+    }
+    .hero a:hover {background: #fff000;}
+    main {padding: 2rem; text-align: center;}
+    .cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem; margin-top: 2rem;
+    }
+    .card {
+      background: white; padding: 1.5rem; border-radius: 10px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer; text-decoration: none; color: inherit;
+      display: block;
+    }
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+    }
+    .card h3 {margin-bottom: 1rem; color: #333;}
+    .card p {font-size: 0.95rem; color: #555;}
+    footer {
+      background: #333; color: #fff; text-align: center; padding: 1rem; margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>EZ Grade Tracker</h1>
+    <nav>
+      <a href="index.html" class="active">Home</a>
+      <a href="teachers.html">Teachers</a>
+      <a href="enrollment.html">Enrollment</a>
+      <a href="ezgrade.html">EZGrade</a>
+      <a href="org.html">Organization</a>
+      <a href="contact us.html">Contact Us</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h2>Welcome to PCCAES EZ Grade Tracker</h2>
+    <p>A simple multi-page site with links to Teachers, Enrollment, EZGrade, Organization, and Contact information.</p>
+    <a href="teachers.html">Get Started →</a>
+  </section>
+
+  <main>
+    <h2>Explore Our Pages</h2>
+    <div class="cards">
+      <a href="teachers.html" class="card">
+        <h3>👩‍🏫 Teachers</h3>
+        <p>Meet our dedicated and passionate teaching staff.</p>
+      </a>
+      <a href="enrollment.html" class="card">
+        <h3>📝 Enrollment</h3>
+        <p>Find all the details you need about our enrollment process.</p>
+      </a>
+      <a href="ezgrade.html" class="card">
+        <h3>📊 EZGrade</h3>
+        <p>Track and manage grades easily with our EZGrade system.</p>
+      </a>
+      <a href="org.html" class="card">
+        <h3>🏫 Organization</h3>
+        <p>Learn more about our school’s structure and organization.</p>
+      </a>
+      <!-- Contact Us card opens email directly -->
+      <a href="mailto:es.prescorazoncaqunio@depedqc.ph?subject=Inquiry%20from%20Website&body=Hello%20PCCAES%20Team,%0D%0A%0D%0AMy%20name%20is%20________________.%0D%0AI%20would%20like%20to%20ask%20about%20________________.%0D%0A%0D%0AThank%20you!" class="card">
+        <h3>📞 Contact Us</h3>
+        <p>Click here to send us an email directly.</p>
+      </a>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 PCCAES Website. All Rights Reserved.</p>
+  </footer>
+</body>
+</html>
