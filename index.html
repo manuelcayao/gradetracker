@@ -7,18 +7,32 @@
   <style>
     * {margin: 0; padding: 0; box-sizing: border-box;}
     body {font-family: Arial, sans-serif; background: #f9f9f9; color: #333; line-height: 1.6;}
+    
+    /* HEADER */
     header {
       background: #333; color: #fff; padding: 1rem 2rem;
-      position: sticky; top: 0; z-index: 1000; display: flex; justify-content: space-between; align-items: center;
+      position: sticky; top: 0; z-index: 1000;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    header .logo-container {
+      display: flex; align-items: center;
+    }
+    header .logo-link {
+      display: flex; align-items: center; text-decoration: none; color: #fff;
+    }
+    header img.logo {
+      height: 55px; width: auto; margin-right: 12px;
     }
     header h1 {margin: 0; font-size: 1.8rem;}
     nav a {
       color: #fff; text-decoration: none; margin: 0 12px; font-weight: bold; transition: color 0.3s ease;
     }
     nav a:hover, nav a.active {color: #ffcc00;}
+    
+    /* HERO */
     .hero {
       background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
-                  url("https://picsum.photos/1600/600") center/cover no-repeat;
+                  url("pccaessch.jpg") center/cover no-repeat; /* Replace with your school photo */
       color: white; height: 65vh;
       display: flex; flex-direction: column; justify-content: center; align-items: center;
       text-align: center; padding: 0 1rem;
@@ -31,6 +45,8 @@
       border-radius: 5px; transition: background 0.3s ease;
     }
     .hero a:hover {background: #fff000;}
+    
+    /* MAIN */
     main {padding: 2rem; text-align: center;}
     .cards {
       display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -48,14 +64,31 @@
     }
     .card h3 {margin-bottom: 1rem; color: #333;}
     .card p {font-size: 0.95rem; color: #555;}
+    
+    /* FOOTER */
     footer {
       background: #333; color: #fff; text-align: center; padding: 1rem; margin-top: 2rem;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .hero h2 { font-size: 2rem; }
+      .hero p { font-size: 1rem; }
+      header h1 { font-size: 1.4rem; }
+      header img.logo { height: 40px; }
     }
   </style>
 </head>
 <body>
+  <!-- HEADER -->
   <header>
-    <h1>EZ Grade Tracker</h1>
+    <div class="logo-container">
+      <!-- Logo + Title clickable link -->
+      <a href="index.html" class="logo-link">
+        <img src="pccaeslogo.png" alt="School Logo" class="logo">
+        <h1>EZ Grade Tracker</h1>
+      </a>
+    </div>
     <nav>
       <a href="index.html" class="active">Home</a>
       <a href="teachers.html">Teachers</a>
@@ -66,12 +99,14 @@
     </nav>
   </header>
 
+  <!-- HERO -->
   <section class="hero">
     <h2>Welcome to PCCAES EZ Grade Tracker</h2>
     <p>A simple multi-page site with links to Teachers, Enrollment, EZGrade, Organization, and Contact information.</p>
     <a href="teachers.html">Get Started →</a>
   </section>
 
+  <!-- MAIN CONTENT -->
   <main>
     <h2>Explore Our Pages</h2>
     <div class="cards">
@@ -99,6 +134,7 @@
     </div>
   </main>
 
+  <!-- FOOTER -->
   <footer>
     <p>&copy; 2025 PCCAES Website. All Rights Reserved.</p>
   </footer>
